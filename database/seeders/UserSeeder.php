@@ -53,7 +53,7 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $u) {
-            $user = User::create([
+            User::create([
                 'name' => $u['name'],
                 'email' => $u['email'],
                 'email_verified_at' => $u['email_verified_at'],
@@ -61,21 +61,7 @@ class UserSeeder extends Seeder
                 'terms' => $u['terms'] ?? false,
                 'role' => $u['role'],
                 'status' => $u['status'],
-                'points' => $u['role'] === 'User' ? 250 : 0,
-                'points_valid_till' => $u['role'] === 'User' ? now()->addMonth() : null,
             ]);
-
-            if ($u['email'] === 'user@gmail.com') {
-                \App\Models\Subscription::create([
-                    'user_id' => $user->id,
-                    'buyer_user_id' => $user->id,
-                    'type' => 'Basic Pass',
-                    'stripe_id' => 'sub_seed_1001',
-                    'membership_id' => 'BAS-9918-5412',
-                    'stripe_status' => 'active',
-                    'ends_at' => now()->addMonth(),
-                ]);
-            }
         }
     }
 }
