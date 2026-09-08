@@ -638,7 +638,7 @@ export default function Dashboard({
                             System Overview & Analytics
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Realtime tracking of users, businesses, plans, redemptions, and revenue.
+                            System overview, user analytics, and platform activity.
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -674,7 +674,7 @@ export default function Dashboard({
                                 onClick={() => setIsOpen(!isOpen)}
                                 className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3.5 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-accent hover:shadow-md"
                             >
-                                <Calendar className="size-4 text-violet-500" />
+                                <Calendar className="size-4 text-[#0EADAB]" />
                                 <span className="max-w-[280px] truncate">
                                     {formatDateRange(filters?.from, filters?.to, filters?.preset)}
                                 </span>
@@ -694,7 +694,7 @@ export default function Dashboard({
                                             onClick={() => handlePreset('today')}
                                             className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/50 px-2.5 py-2 text-left text-xs font-semibold text-foreground transition hover:bg-accent"
                                         >
-                                            <span className="size-2 rounded-full bg-violet-500" />
+                                            <span className="size-2 rounded-full bg-[#0EADAB]" />
                                             Today
                                         </button>
                                         <button
@@ -774,7 +774,7 @@ export default function Dashboard({
                                                 id="from-date"
                                                 value={tempFrom}
                                                 onChange={(e) => setTempFrom(e.target.value)}
-                                                className="w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-xs text-foreground focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 focus:outline-none"
+                                                className="w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-xs text-foreground focus:border-[#0EADAB] focus:ring-2 focus:ring-[#0EADAB]/20 focus:outline-none"
                                             />
                                         </div>
                                         <div>
@@ -789,7 +789,7 @@ export default function Dashboard({
                                                 id="to-date"
                                                 value={tempTo}
                                                 onChange={(e) => setTempTo(e.target.value)}
-                                                className="w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-xs text-foreground focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 focus:outline-none"
+                                                className="w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-xs text-foreground focus:border-[#0EADAB] focus:ring-2 focus:ring-[#0EADAB]/20 focus:outline-none"
                                             />
                                         </div>
                                     </div>
@@ -805,7 +805,7 @@ export default function Dashboard({
                                         <button
                                             type="button"
                                             onClick={() => handleApply(tempFrom, tempTo)}
-                                            className="cursor-pointer rounded-lg bg-violet-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-violet-500"
+                                            className="cursor-pointer rounded-lg bg-[#0EADAB] px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#0C9896]"
                                         >
                                             Apply Range
                                         </button>
@@ -817,7 +817,8 @@ export default function Dashboard({
                 </div>
 
                 {/* Primary Stats Grid */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Total Revenue - Commented out
                     <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4">
                         <StatCard
                             title="Total Revenue"
@@ -831,19 +832,51 @@ export default function Dashboard({
                             trendLabel={viewMode === 'lifetime' ? 'All Time' : stats.trend_label}
                         />
                     </div>
-                    <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4" style={{ animationDelay: '80ms' }}>
+                    */}
+
+                    <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4">
                         <StatCard
                             title="Total Users"
                             value={stats[viewMode].total_users.toLocaleString()}
-                            subtext={`${stats[viewMode].active_users} Active (${stats[viewMode].total_partners} Partners)`}
+                            subtext={`${stats[viewMode].active_users} Active registered users`}
                             trend={formatTrend(stats.users_trend)}
                             trendPositive={stats.users_trend >= 0}
                             icon={<Users className="size-4" />}
-                            accent="from-violet-500/20 to-violet-500/5"
-                            iconBg="bg-violet-500/15 text-violet-600 dark:text-violet-400"
+                            accent="from-[#0EADAB]/20 to-[#0EADAB]/5"
+                            iconBg="bg-[#0EADAB]/15 text-[#0EADAB] dark:text-[#0EADAB]"
                             trendLabel={viewMode === 'lifetime' ? 'All Time' : stats.trend_label}
                         />
                     </div>
+
+                    <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4" style={{ animationDelay: '80ms' }}>
+                        <StatCard
+                            title="Active Users"
+                            value={stats[viewMode].active_users.toLocaleString()}
+                            subtext={`${stats[viewMode].total_users} Total in system`}
+                            trend={formatTrend(stats.active_users_trend || stats.users_trend)}
+                            trendPositive={(stats.active_users_trend || stats.users_trend) >= 0}
+                            icon={<UserCheck className="size-4" />}
+                            accent="from-emerald-500/20 to-emerald-500/5"
+                            iconBg="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                            trendLabel={viewMode === 'lifetime' ? 'All Time' : stats.trend_label}
+                        />
+                    </div>
+
+                    <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4" style={{ animationDelay: '160ms' }}>
+                        <StatCard
+                            title="Administrators"
+                            value={stats[viewMode].total_admins.toLocaleString()}
+                            subtext="System Admin Accounts"
+                            trend="+0%"
+                            trendPositive={true}
+                            icon={<Shield className="size-4" />}
+                            accent="from-amber-500/20 to-amber-500/5"
+                            iconBg="bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                            trendLabel="System Access"
+                        />
+                    </div>
+
+                    {/* Businesses - Commented out
                     <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4" style={{ animationDelay: '160ms' }}>
                         <StatCard
                             title="Businesses"
@@ -857,6 +890,9 @@ export default function Dashboard({
                             trendLabel={viewMode === 'lifetime' ? 'All Time' : stats.trend_label}
                         />
                     </div>
+                    */}
+
+                    {/* Passes - Commented out
                     <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4" style={{ animationDelay: '240ms' }}>
                         <StatCard
                             title="Passes"
@@ -870,6 +906,9 @@ export default function Dashboard({
                             trendLabel="Active passes"
                         />
                     </div>
+                    */}
+
+                    {/* Redemptions / Visits - Commented out
                     <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4" style={{ animationDelay: '320ms' }}>
                         <StatCard
                             title="Redemptions / Visits"
@@ -883,10 +922,12 @@ export default function Dashboard({
                             trendLabel={viewMode === 'lifetime' ? 'All Time' : stats.trend_label}
                         />
                     </div>
+                    */}
                 </div>
 
-                {/* Secondary breakdown & chart */}
-                <div className="grid gap-6 lg:grid-cols-7">
+                {/* Secondary section: User Roles & Recent Signups */}
+                <div className="grid gap-6">
+                    {/* Activity & Growth Overview Chart - Commented out for now
                     <div className="animate-in overflow-hidden rounded-xl border border-sidebar-border bg-card p-6 shadow-sm duration-700 fill-mode-both fade-in slide-in-from-left-6 lg:col-span-4">
                         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                             <div>
@@ -916,25 +957,33 @@ export default function Dashboard({
                             <SystemActivityChart data={chartData} />
                         </div>
                     </div>
+                    */}
 
-                    <div className="animate-in rounded-xl border border-sidebar-border bg-card p-6 shadow-sm duration-700 fill-mode-both fade-in slide-in-from-right-6 lg:col-span-3">
-                        <h3 className="mb-4 text-lg font-semibold">
-                            User Roles & Recent Signups
-                        </h3>
+                    <div className="animate-in rounded-xl border border-sidebar-border bg-card p-6 shadow-sm duration-700 fill-mode-both fade-in slide-in-from-bottom-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <div>
+                                <h3 className="text-lg font-semibold">
+                                    User Roles & Recent Registrations
+                                </h3>
+                                <p className="text-xs text-muted-foreground">
+                                    User accounts breakdown and recent signup activity
+                                </p>
+                            </div>
+                        </div>
                         
                         {/* Role breakdown chips */}
-                        <div className="mb-4 grid grid-cols-3 gap-2">
-                            <div className="rounded-lg border border-border/50 bg-background/50 p-2.5 text-center">
+                        <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div className="rounded-lg border border-border/50 bg-background/50 p-3 text-center">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Admins</p>
-                                <p className="text-lg font-bold text-amber-600 dark:text-amber-400">{stats[viewMode].total_admins}</p>
+                                <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{stats[viewMode].total_admins}</p>
                             </div>
-                            <div className="rounded-lg border border-border/50 bg-background/50 p-2.5 text-center">
+                            <div className="rounded-lg border border-border/50 bg-background/50 p-3 text-center">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Partners</p>
-                                <p className="text-lg font-bold text-cyan-600 dark:text-cyan-400">{stats[viewMode].total_partners}</p>
+                                <p className="text-xl font-bold text-[#0EADAB]">{stats[viewMode].total_partners}</p>
                             </div>
-                            <div className="rounded-lg border border-border/50 bg-background/50 p-2.5 text-center">
+                            <div className="rounded-lg border border-border/50 bg-background/50 p-3 text-center">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Users</p>
-                                <p className="text-lg font-bold text-violet-600 dark:text-violet-400">{stats[viewMode].total_customers}</p>
+                                <p className="text-xl font-bold text-[#0EADAB]">{stats[viewMode].total_customers}</p>
                             </div>
                         </div>
 
