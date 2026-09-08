@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->uuid('account_id')->nullable()->unique();
+            $table->string('full_name')->nullable();
+            $table->string('name')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('phone_number')->nullable();
             $table->string('phone')->nullable();
             $table->string('password');
             $table->text('two_factor_secret')->nullable();
@@ -23,9 +26,14 @@ return new class extends Migration
             $table->timestamp('two_factor_confirmed_at')->nullable();
             $table->boolean('email_2fa_enabled')->default(false);
             $table->boolean('is_2fa_enabled')->default(true);
+            $table->boolean('enable2fa')->default(false);
             $table->text('avatar')->nullable();
             $table->text('address')->nullable();
             $table->boolean('terms')->default(false);
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_superuser')->default(false);
+            $table->enum('user_type', ['INTERNAL', 'EXTERNAL'])->default('EXTERNAL');
+            $table->dateTime('last_login')->nullable();
             $table->dateTime('last_login_at')->nullable();
             $table->enum('role', ['User', 'Admin', 'Partner'])->default('User');
             $table->enum('status', ['Active', 'Inactive', 'Banned'])->default('Active');

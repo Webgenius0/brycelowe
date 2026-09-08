@@ -9,15 +9,122 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'avatar', 'password', 'phone', 'address', 'status', 'role', 'terms', 'last_login_at', 'email_2fa_enabled', 'is_2fa_enabled', 'stripe_connect_id', 'stripe_connect_active'])]
+#[Fillable([
+    'account_id',
+    'full_name',
+    'name',
+    'email',
+    'phone_number',
+    'phone',
+    'avatar',
+    'enable2fa',
+    'is_active',
+    'is_superuser',
+    'user_type',
+    'last_login',
+    'last_login_at',
+    'password',
+    'address',
+    'status',
+    'role',
+    'terms',
+    'email_2fa_enabled',
+    'is_2fa_enabled',
+    'stripe_connect_id',
+    'stripe_connect_active',
+])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'created_at', 'updated_at', 'reset_code', 'reset_code_expires_at'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (empty($user->account_id)) {
+                $user->account_id = (string) Str::uuid();
+            }
+            if (empty($user->full_name) && !empty($user->name)) {
+                $user->full_name = $user->name;
+            }
+            if (empty($user->name) && !empty($user->full_name)) {
+                $user->name = $user->full_name;
+            }
+            if (empty($user->phone_number) && !empty($user->phone)) {
+                $user->phone_number = $user->phone;
+            }
+            if (empty($user->user_type)) {
+                $user->user_type = ($user->role === 'Admin' || $user->is_superuser) ? 'INTERNAL' : 'EXTERNAL';
+            }
+        });
+
+        static::saving(function (User $user) {
+            if (!empty($user->full_name) && empty($user->name)) {
+                $user->name = $user->full_name;
+            }
+            if (!empty($user->name) && empty($user->full_name)) {
+                $user->full_name = $user->name;
+            }
+            if (!empty($user->phone_number) && empty($user->phone)) {
+                $user->phone = $user->phone_number;
+            }
+            if (!empty($user->phone) && empty($user->phone_number)) {
+                $user->phone_number = $user->phone;
+            }
+            if (!empty($user->status)) {
+                $user->is_active = ($user->status === 'Active');
+            } elseif (isset($user->is_active)) {
+                $user->status = $user->is_active ? 'Active' : 'Inactive';
+            }
+            if (isset($user->enable2fa)) {
+                $user->is_2fa_enabled = $user->enable2fa;
+            }
+            if (isset($user->last_login) && empty($user->last_login_at)) {
+                $user->last_login_at = $user->last_login;
+            }
+        });
+    }
+
+    /**
+     * Set the status attribute and sync is_active.
+     */
+    public function setStatusAttribute($value): void
+    {
+        $this->attributes['status'] = $value;
+        $this->attributes['is_active'] = ($value === 'Active');
+    }
+
+    /**
+     * Set the is_active attribute and sync status.
+     */
+    public function setIsActiveAttribute($value): void
+    {
+        $isActive = (bool) $value;
+        $this->attributes['is_active'] = $isActive;
+        if (empty($this->attributes['status']) || in_array($this->attributes['status'], ['Active', 'Inactive'])) {
+            $this->attributes['status'] = $isActive ? 'Active' : 'Inactive';
+        }
+    }
+
+    /**
+     * Get the is_active attribute based on status.
+     */
+    public function getIsActiveAttribute($value): bool
+    {
+        if (isset($this->attributes['status'])) {
+            return $this->attributes['status'] === 'Active';
+        }
+
+        return (bool) $value;
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -32,8 +139,12 @@ class User extends Authenticatable
             'two_factor_confirmed_at' => 'datetime',
             'email_2fa_enabled' => 'boolean',
             'is_2fa_enabled' => 'boolean',
+            'enable2fa' => 'boolean',
+            'is_active' => 'boolean',
+            'is_superuser' => 'boolean',
             'stripe_connect_active' => 'boolean',
             'terms' => 'boolean',
+            'last_login' => 'datetime',
             'last_login_at' => 'datetime',
         ];
     }
