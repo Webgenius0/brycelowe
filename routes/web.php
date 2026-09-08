@@ -29,7 +29,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
         Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
     });
+
+    // Newsletter routes
+    Route::prefix('newsletter')->name('newsletter.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Web\NewsletterController::class, 'index'])->name('index');
+        Route::post('/subscribers', [\App\Http\Controllers\Web\NewsletterController::class, 'store'])->name('subscribe');
+        Route::post('/subscribers/{id}/toggle', [\App\Http\Controllers\Web\NewsletterController::class, 'toggleStatus'])->name('toggle');
+        Route::delete('/subscribers/{id}', [\App\Http\Controllers\Web\NewsletterController::class, 'destroy'])->name('destroy');
+        Route::post('/broadcast', [\App\Http\Controllers\Web\NewsletterController::class, 'sendBroadcast'])->name('broadcast');
+        Route::get('/export', [\App\Http\Controllers\Web\NewsletterController::class, 'export'])->name('export');
+    });
 });
+
+// Public newsletter subscription route
+Route::post('newsletter/subscribe', [\App\Http\Controllers\Web\NewsletterController::class, 'store'])->name('newsletter.public.subscribe');
 
 // Public routes for 2FA Login Challenge (Email OTP & Passkeys)
 Route::post('two-factor-challenge/email/send', [\App\Http\Controllers\Settings\MultiTwoFactorController::class, 'sendLoginEmailCode'])->name('two-factor.login.email.send');

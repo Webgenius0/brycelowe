@@ -6,6 +6,7 @@ import {
     HelpCircle,
     LayoutGrid,
     LogOut,
+    Mail,
     Users,
 } from 'lucide-react';
 
@@ -50,6 +51,11 @@ const mainNavItems: NavItem[] = [
         title: 'Users',
         href: '/user',
         icon: Users,
+    },
+    {
+        title: 'Newsletter',
+        href: '/newsletter',
+        icon: Mail,
     },
     {
         title: 'Dynamic Pages',

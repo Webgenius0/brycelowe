@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
     Users,
     TrendingUp,
@@ -15,6 +15,13 @@ import {
     Lock,
     Globe,
     Zap,
+    Mail,
+    CreditCard,
+    Wallet,
+    DollarSign,
+    ArrowUpRight,
+    ArrowRight,
+    Clock,
 } from 'lucide-react';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import {
@@ -50,6 +57,8 @@ type StatBreakdown = {
     total_admins: number;
     total_partners: number;
     total_customers: number;
+    total_subscribers?: number;
+    active_subscribers?: number;
 };
 
 type Stats = {
@@ -84,10 +93,33 @@ type ChartPoint = {
     redemptions?: number;
 };
 
+type Subscriber = {
+    id: number;
+    email: string;
+    name: string | null;
+    status: string;
+    source: string;
+    created_at: string;
+};
+
+type Campaign = {
+    id: number;
+    subject: string;
+    recipients_count: number;
+    status: string;
+    sent_at: string;
+};
+
 type Props = {
     stats: Stats;
     chartData: ChartPoint[];
     recentUsers: RecentUser[];
+    newsletter?: {
+        total: number;
+        active: number;
+        recentSubscribers: Subscriber[];
+        recentCampaigns: Campaign[];
+    };
     filters?: {
         from?: string;
         to?: string;
@@ -143,6 +175,59 @@ const ROLE_DONUT_DATA = [
     { name: 'Business Partners', value: 890, color: '#3b82f6' },
     { name: 'Administrators', value: 120, color: '#f59e0b' },
     { name: 'Staff & Moderators', value: 280, color: '#8b5cf6' },
+];
+
+const MOCK_PAYMENTS = [
+    {
+        id: 'tx_101',
+        customer: 'Johnathan Miller',
+        email: 'johnathan@example.com',
+        description: 'Enterprise Tier Subscription',
+        amount: '$249.00',
+        method: 'Visa •••• 4242',
+        status: 'Completed',
+        date: '5m ago',
+    },
+    {
+        id: 'tx_102',
+        customer: 'Sophia Rodriguez',
+        email: 'sophia.r@techcorp.io',
+        description: 'Pro Monthly Plan Renewal',
+        amount: '$89.00',
+        method: 'Mastercard •••• 8819',
+        status: 'Completed',
+        date: '24m ago',
+    },
+    {
+        id: 'tx_103',
+        customer: 'Alexander Wright',
+        email: 'wright.alex@designhub.co',
+        description: 'Partner Commission Payout',
+        amount: '$145.50',
+        method: 'Stripe Direct',
+        status: 'Processing',
+        date: '1h ago',
+    },
+    {
+        id: 'tx_104',
+        customer: 'David Chen',
+        email: 'david.chen@cloudstack.net',
+        description: 'Developer Add-on Tier',
+        amount: '$39.00',
+        method: 'Visa •••• 1092',
+        status: 'Completed',
+        date: '2h ago',
+    },
+    {
+        id: 'tx_105',
+        customer: 'Emma Watson',
+        email: 'emma.w@startupventures.com',
+        description: 'Custom Domain SSL Pack',
+        amount: '$15.00',
+        method: 'PayPal •••• 7721',
+        status: 'Completed',
+        date: '3h ago',
+    },
 ];
 
 const ANIMATION_CONFIG = {
@@ -272,6 +357,7 @@ export default function Dashboard({
     stats,
     chartData: _serverChartData,
     recentUsers,
+    newsletter,
     filters,
 }: Props) {
     const formatTrend = (v: number) => (v >= 0 ? `+${v}%` : `${v}%`);
@@ -565,7 +651,7 @@ export default function Dashboard({
                 </div>
 
                 {/* ───────────────────── TOP STATS CARDS ───────────────────── */}
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-4">
                     <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4">
                         <StatCard
                             title="Total Users"
@@ -606,6 +692,22 @@ export default function Dashboard({
                             iconBg="bg-amber-500/15 text-amber-600 dark:text-amber-400"
                             trendLabel="System Access"
                         />
+                    </div>
+
+                    <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4" style={{ animationDelay: '240ms' }}>
+                        <Link href="/newsletter" className="block cursor-pointer">
+                            <StatCard
+                                title="Newsletter Subscribers"
+                                value={(newsletter?.total ?? 0).toLocaleString()}
+                                subtext={`${newsletter?.active ?? 0} Active Audience (Manage)`}
+                                trend="+100%"
+                                trendPositive={true}
+                                icon={<Mail className="size-4" />}
+                                accent="from-purple-500/15 to-transparent"
+                                iconBg="bg-purple-500/15 text-purple-600 dark:text-purple-400"
+                                trendLabel="View Page →"
+                            />
+                        </Link>
                     </div>
                 </div>
 
@@ -847,156 +949,211 @@ export default function Dashboard({
                     </div>
                 </div>
 
-                {/* ───────────────────── USER ROLES & RECENT REGISTRATIONS ───────────────────── */}
+                {/* ───────────────────── BOTTOM ROW: RECENT SIGNUPS & PAYMENT TRANSACTIONS ───────────────────── */}
                 <div className="grid gap-6 lg:grid-cols-12">
-                    {/* User accounts breakdown & table (8 cols) */}
-                    <div className="animate-in rounded-2xl border border-sidebar-border bg-card p-6 shadow-2xs duration-700 fill-mode-both fade-in slide-in-from-bottom-4 lg:col-span-8">
-                        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                            <div>
-                                <h3 className="text-base font-bold text-foreground">
-                                    User Roles & Recent Registrations
-                                </h3>
-                                <p className="text-xs text-muted-foreground mt-0.5">
-                                    User accounts breakdown and recent signup activity
+                    {/* 👤 Recent Signups & User Breakdown (6 cols) */}
+                    <div className="animate-in rounded-2xl border border-sidebar-border bg-card p-6 shadow-2xs duration-700 fill-mode-both fade-in slide-in-from-bottom-4 lg:col-span-6 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center justify-between gap-3 mb-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="flex size-7 items-center justify-center rounded-lg bg-[#0EADAB]/15 text-[#0EADAB]">
+                                        <Users className="size-4" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-foreground">
+                                            Recent Signups & Users
+                                        </h3>
+                                        <p className="text-xs text-muted-foreground">
+                                            Latest account registrations and role permissions
+                                        </p>
+                                    </div>
+                                </div>
+                                <Link
+                                    href="/user"
+                                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#0EADAB] hover:underline"
+                                >
+                                    <span>All Users</span>
+                                    <ArrowRight className="size-3" />
+                                </Link>
+                            </div>
+
+                            {/* Role breakdown chips */}
+                            <div className="mb-4 grid grid-cols-3 gap-2">
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-center">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Admins</p>
+                                    <p className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+                                        {stats[viewMode].total_admins}
+                                    </p>
+                                </div>
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-center">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Partners</p>
+                                    <p className="text-lg font-bold text-[#0EADAB] mt-0.5">
+                                        {stats[viewMode].total_partners}
+                                    </p>
+                                </div>
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-center">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Users</p>
+                                    <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-0.5">
+                                        {stats[viewMode].total_customers}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {recentUsers.length === 0 ? (
+                                <p className="py-8 text-center text-xs text-muted-foreground">
+                                    No new signups found in this date range.
                                 </p>
-                            </div>
-                        </div>
-                        
-                        {/* Role breakdown chips */}
-                        <div className="mb-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-center">
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Admins</p>
-                                <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">{stats[viewMode].total_admins}</p>
-                            </div>
-                            <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-center">
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Partners</p>
-                                <p className="text-xl font-bold text-[#0EADAB] mt-0.5">{stats[viewMode].total_partners}</p>
-                            </div>
-                            <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-center">
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Users</p>
-                                <p className="text-xl font-bold text-purple-600 dark:text-purple-400 mt-0.5">{stats[viewMode].total_customers}</p>
-                            </div>
-                        </div>
+                            ) : (
+                                <div className="space-y-1">
+                                    {recentUsers.slice(0, 5).map((u) => {
+                                        const roleLower = u.role?.toLowerCase();
+                                        const isAdmin = roleLower === 'admin';
+                                        const isPartner = roleLower === 'partner';
 
-                        {recentUsers.length === 0 ? (
-                            <p className="py-8 text-center text-sm text-muted-foreground">
-                                No new signups in this range.
-                            </p>
-                        ) : (
-                            <div className="space-y-1">
-                                {recentUsers.map((u) => {
-                                    const roleLower = u.role?.toLowerCase();
-                                    const isAdmin = roleLower === 'admin';
-                                    const isPartner = roleLower === 'partner';
+                                        const badgeClass = isAdmin
+                                            ? 'bg-amber-500/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/30'
+                                            : isPartner
+                                              ? 'bg-cyan-500/10 text-cyan-600 ring-cyan-600/20 dark:bg-cyan-400/10 dark:text-cyan-400 dark:ring-cyan-400/30'
+                                              : 'bg-violet-500/10 text-violet-600 ring-violet-600/20 dark:bg-violet-400/10 dark:text-violet-400 dark:ring-violet-400/30';
 
-                                    const badgeClass = isAdmin
-                                        ? 'bg-amber-500/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/30'
-                                        : isPartner
-                                          ? 'bg-cyan-500/10 text-cyan-600 ring-cyan-600/20 dark:bg-cyan-400/10 dark:text-cyan-400 dark:ring-cyan-400/30'
-                                          : 'bg-violet-500/10 text-violet-600 ring-violet-600/20 dark:bg-violet-400/10 dark:text-violet-400 dark:ring-violet-400/30';
+                                        const avatarGrad = isAdmin
+                                            ? 'linear-gradient(135deg, #f59e0b, #d97706)'
+                                            : isPartner
+                                              ? 'linear-gradient(135deg, #06b6d4, #0284c7)'
+                                              : 'linear-gradient(135deg, #8b5cf6, #6d28d9)';
 
-                                    const avatarGrad = isAdmin
-                                        ? 'linear-gradient(135deg, #f59e0b, #d97706)'
-                                        : isPartner
-                                          ? 'linear-gradient(135deg, #06b6d4, #0284c7)'
-                                          : 'linear-gradient(135deg, #8b5cf6, #6d28d9)';
-
-                                    return (
-                                        <div
-                                            key={u.id}
-                                            className="group relative -mx-2 flex animate-in items-center justify-between rounded-xl border-b border-border/40 px-3 py-2.5 transition-all duration-200 fill-mode-both fade-in slide-in-from-right-4 last:border-0 hover:bg-muted/30"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div
-                                                    className="flex size-9 items-center justify-center rounded-full text-xs font-bold text-white shadow-xs ring-1 ring-border"
-                                                    style={{
-                                                        background: avatarGrad,
-                                                    }}
-                                                >
-                                                    {u.name
-                                                        .split(' ')
-                                                        .map((n) => n[0])
-                                                        .join('')
-                                                        .slice(0, 2)}
+                                        return (
+                                            <div
+                                                key={u.id}
+                                                className="group relative -mx-2 flex items-center justify-between rounded-xl border-b border-border/40 px-3 py-2 transition-all duration-200 last:border-0 hover:bg-muted/30"
+                                            >
+                                                <div className="flex items-center gap-2.5">
+                                                    <div
+                                                        className="flex size-8 items-center justify-center rounded-full text-xs font-bold text-white shadow-xs ring-1 ring-border"
+                                                        style={{
+                                                            background: avatarGrad,
+                                                        }}
+                                                    >
+                                                        {u.name
+                                                            .split(' ')
+                                                            .map((n) => n[0])
+                                                            .join('')
+                                                            .slice(0, 2)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-foreground">
+                                                            {u.name}
+                                                        </p>
+                                                        <p className="text-[11px] text-muted-foreground">
+                                                            {u.email}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-xs font-semibold text-foreground">
-                                                        {u.name}
-                                                    </p>
-                                                    <p className="text-[11px] text-muted-foreground">
-                                                        {u.email}
+                                                <div className="text-right">
+                                                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${badgeClass}`}>
+                                                        {u.role}
+                                                    </span>
+                                                    <p className="mt-0.5 text-[10px] text-muted-foreground">
+                                                        {u.created_at}
                                                     </p>
                                                 </div>
                                             </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* 💳 Payment & Billing Activity Mockup (6 cols) */}
+                    <div className="animate-in rounded-2xl border border-sidebar-border bg-card p-6 shadow-2xs duration-700 fill-mode-both fade-in slide-in-from-bottom-4 lg:col-span-6 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center justify-between gap-3 mb-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                                        <CreditCard className="size-4" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-foreground">
+                                            Payment & Transaction Activity
+                                        </h3>
+                                        <p className="text-xs text-muted-foreground">
+                                            Recent Stripe checkouts, subscription billing, and payouts
+                                        </p>
+                                    </div>
+                                </div>
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold">
+                                    <Sparkles className="size-3" /> Live Sync
+                                </span>
+                            </div>
+
+                            {/* Revenue quick metrics */}
+                            <div className="mb-4 grid grid-cols-3 gap-2">
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-center">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Revenue</p>
+                                    <p className="text-lg font-bold text-foreground mt-0.5">$24,850</p>
+                                </div>
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-center">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Success Rate</p>
+                                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">99.2%</p>
+                                </div>
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-center">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Subscribers</p>
+                                    <p className="text-lg font-bold text-[#0EADAB] mt-0.5">142 Active</p>
+                                </div>
+                            </div>
+
+                            {/* Transaction List */}
+                            <div className="space-y-1">
+                                {MOCK_PAYMENTS.map((tx) => {
+                                    const isDone = tx.status === 'Completed';
+                                    return (
+                                        <div
+                                            key={tx.id}
+                                            className="group relative -mx-2 flex items-center justify-between rounded-xl border-b border-border/40 px-3 py-2 transition-all duration-200 last:border-0 hover:bg-muted/30"
+                                        >
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground border border-border/60 font-semibold text-xs shrink-0">
+                                                    <DollarSign className="size-4 text-emerald-600 dark:text-emerald-400" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-semibold text-foreground">
+                                                        {tx.description}
+                                                    </p>
+                                                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                                                        <span>{tx.customer}</span>
+                                                        <span>•</span>
+                                                        <span>{tx.method}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div className="text-right">
-                                                <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${badgeClass}`}>
-                                                    {u.role}
-                                                </span>
-                                                <p className="mt-1 text-[10px] text-muted-foreground">
-                                                    {u.created_at}
+                                                <p className="text-xs font-extrabold text-foreground">
+                                                    {tx.amount}
                                                 </p>
+                                                <div className="mt-0.5 flex items-center justify-end gap-1">
+                                                    <span
+                                                        className={`inline-flex items-center rounded-md px-1.5 py-0.2 text-[10px] font-semibold ${
+                                                            isDone
+                                                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                                                        }`}
+                                                    >
+                                                        {tx.status}
+                                                    </span>
+                                                    <span className="text-[10px] text-muted-foreground">
+                                                        {tx.date}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
-                        )}
-                    </div>
-
-                    {/* System Security & Health Quick Status Widget (4 cols) */}
-                    <div className="animate-in rounded-2xl border border-sidebar-border bg-card p-6 shadow-2xs duration-700 fill-mode-both fade-in slide-in-from-bottom-4 lg:col-span-4 flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                                    <ShieldAlert className="size-4" />
-                                </div>
-                                <h3 className="text-base font-bold text-foreground">Security & System Health</h3>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Overview of active protection layers and system services
-                            </p>
-                        </div>
-
-                        <div className="space-y-2.5 my-4">
-                            <div className="flex items-center justify-between p-2.5 rounded-xl border border-sidebar-border bg-muted/20 text-xs">
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle2 className="size-4 text-emerald-500" />
-                                    <span className="font-medium text-foreground">System Status</span>
-                                </div>
-                                <span className="font-semibold text-emerald-600 dark:text-emerald-400">99.9% Online</span>
-                            </div>
-
-                            <div className="flex items-center justify-between p-2.5 rounded-xl border border-sidebar-border bg-muted/20 text-xs">
-                                <div className="flex items-center gap-2">
-                                    <Lock className="size-4 text-[#0EADAB]" />
-                                    <span className="font-medium text-foreground">Two-Factor MFA</span>
-                                </div>
-                                <span className="font-semibold text-[#0EADAB]">Protected</span>
-                            </div>
-
-                            <div className="flex items-center justify-between p-2.5 rounded-xl border border-sidebar-border bg-muted/20 text-xs">
-                                <div className="flex items-center gap-2">
-                                    <Shield className="size-4 text-amber-500" />
-                                    <span className="font-medium text-foreground">Rate Limiting / Lockout</span>
-                                </div>
-                                <span className="font-semibold text-amber-600 dark:text-amber-400">Active</span>
-                            </div>
-
-                            <div className="flex items-center justify-between p-2.5 rounded-xl border border-sidebar-border bg-muted/20 text-xs">
-                                <div className="flex items-center gap-2">
-                                    <Zap className="size-4 text-purple-500" />
-                                    <span className="font-medium text-foreground">Email Sanitizer</span>
-                                </div>
-                                <span className="font-semibold text-purple-600 dark:text-purple-400">Guarded</span>
-                            </div>
-                        </div>
-
-                        <div className="pt-3 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
-                            <span>Platform Engine</span>
-                            <span className="font-semibold text-foreground">Laravel + Inertia React</span>
                         </div>
                     </div>
                 </div>
+
             </div>
         </>
     );

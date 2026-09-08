@@ -196,6 +196,32 @@ class DashboardController extends Controller
         $totalUsersGlobal = User::count();
         $activeUsersGlobal = User::where('status', 'Active')->count();
 
+        // Newsletter stats & recent subscribers
+        $totalSubscribers = \App\Models\NewsletterSubscriber::count();
+        $activeSubscribers = \App\Models\NewsletterSubscriber::where('status', 'subscribed')->count();
+        $recentSubscribers = \App\Models\NewsletterSubscriber::latest()
+            ->limit(6)
+            ->get()
+            ->map(fn($s) => [
+                'id' => $s->id,
+                'email' => $s->email,
+                'name' => $s->name,
+                'status' => $s->status,
+                'source' => $s->source,
+                'created_at' => $s->created_at?->diffForHumans() ?? 'Recently',
+            ]);
+
+        $recentCampaigns = \App\Models\NewsletterCampaign::latest()
+            ->limit(3)
+            ->get()
+            ->map(fn($c) => [
+                'id' => $c->id,
+                'subject' => $c->subject,
+                'recipients_count' => $c->recipients_count,
+                'status' => $c->status,
+                'sent_at' => $c->sent_at?->diffForHumans() ?? 'Draft',
+            ]);
+
         return Inertia::render('dashboard', [
             'stats' => [
                 'lifetime' => [
@@ -214,6 +240,8 @@ class DashboardController extends Controller
                     'total_customers' => User::where('role', 'User')->count(),
                     'total_pages' => $totalDynamicPages,
                     'total_faqs' => $totalFaqs,
+                    'total_subscribers' => $totalSubscribers,
+                    'active_subscribers' => $activeSubscribers,
                 ],
                 'period' => [
                     'total_users' => $currentUsers,
@@ -242,6 +270,12 @@ class DashboardController extends Controller
             ],
             'chartData' => $chartData,
             'recentUsers' => $recentUsers,
+            'newsletter' => [
+                'total' => $totalSubscribers,
+                'active' => $activeSubscribers,
+                'recentSubscribers' => $recentSubscribers,
+                'recentCampaigns' => $recentCampaigns,
+            ],
             'filters' => [
                 'from' => $from->toIso8601String(),
                 'to' => $to->toIso8601String(),
