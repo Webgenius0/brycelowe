@@ -40,7 +40,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
 
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel className="font-mono text-sm font-bold tracking-widest italic">
+            <SidebarGroupLabel className="text-[11px] font-bold tracking-widest text-[#64748b] dark:text-[#94a3b8] uppercase font-sans">
                 Menu
             </SidebarGroupLabel>
             <SidebarMenu>
@@ -63,15 +63,15 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                 asChild
                                 className="group/collapsible"
                             >
-                                <SidebarMenuItem className="mt-2">
+                                <SidebarMenuItem className="mt-1">
                                     <CollapsibleTrigger asChild>
                                         <SidebarMenuButton
                                             tooltip={{ children: item.title }}
-                                            className="cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#0EADAB]/15 data-[state=open]:bg-[#0EADAB]/15 hover:text-[#0A7B7A]"
+                                            className="cursor-pointer font-semibold text-[#334155] dark:text-[#cbd5e1] transition-all duration-200 ease-in-out hover:bg-[#0EADAB]/15 hover:text-[#0EADAB] data-[state=open]:bg-[#0EADAB]/15 data-[state=open]:text-[#0EADAB]"
                                         >
-                                            {item.icon && <item.icon />}
+                                            {item.icon && <item.icon className="size-4.5 shrink-0" />}
                                             <span>{item.title}</span>
-                                            <ChevronDown className="ml-auto transition-transform duration-400 ease-in-out group-data-[state=open]/collapsible:rotate-180" />
+                                            <ChevronDown className="ml-auto transition-transform duration-300 ease-in-out group-data-[state=open]/collapsible:rotate-180 size-4" />
                                         </SidebarMenuButton>
                                     </CollapsibleTrigger>
                                     <CollapsibleContent className="submenu-collapsible-content">
@@ -89,7 +89,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                                                   )
                                                                 : false
                                                         }
-                                                        className="cursor-pointer transition-colors duration-200 hover:bg-[#0EADAB]/10 data-[active=true]:bg-[#0EADAB] data-[active=true]:text-white"
+                                                        className="cursor-pointer font-medium text-[#334155] dark:text-[#cbd5e1] transition-colors duration-200 hover:bg-[#0EADAB]/15 hover:text-[#0EADAB] data-[active=true]:bg-gradient-to-r data-[active=true]:from-[#0EADAB] data-[active=true]:to-[#0A807F] data-[active=true]:text-white data-[active=true]:font-bold data-[active=true]:shadow-sm"
                                                         onClick={
                                                             handleLinkClick
                                                         }
@@ -102,7 +102,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                                             prefetch
                                                         >
                                                             {subItem.icon && (
-                                                                <subItem.icon />
+                                                                <subItem.icon className="size-4 shrink-0" />
                                                             )}
                                                             <span>
                                                                 {subItem.title}
@@ -121,7 +121,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                     return (
                         <SidebarMenuItem
                             key={item.title}
-                            className="mt-2"
+                            className="mt-1"
                             onClick={() => setOpenMenu(null)}
                         >
                             <SidebarMenuButton
@@ -130,11 +130,11 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     item.href ? isCurrentUrl(item.href) : false
                                 }
                                 tooltip={{ children: item.title }}
-                                className="cursor-pointer transition-all duration-200 ease-in-out hover:bg-[#0EADAB]/15 hover:text-[#0A7B7A] data-[active=true]:bg-[#0EADAB] data-[active=true]:text-white"
+                                className="cursor-pointer font-semibold text-[#334155] dark:text-[#cbd5e1] transition-all duration-200 ease-in-out hover:bg-[#0EADAB]/15 hover:text-[#0EADAB] data-[active=true]:bg-gradient-to-r data-[active=true]:from-[#0EADAB] data-[active=true]:to-[#0A807F] data-[active=true]:text-white data-[active=true]:font-bold data-[active=true]:shadow-md data-[active=true]:shadow-[#0EADAB]/20"
                                 onClick={handleLinkClick}
                             >
                                 <Link href={item.href || '#'} prefetch>
-                                    {item.icon && <item.icon />}
+                                    {item.icon && <item.icon className="size-4.5 shrink-0" />}
                                     <span>{item.title}</span>
                                 </Link>
                             </SidebarMenuButton>
