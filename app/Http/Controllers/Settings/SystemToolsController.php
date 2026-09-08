@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Settings;
 
-use App\Models\LoginAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Artisan;
@@ -17,27 +16,11 @@ class SystemToolsController extends Controller
         $logSize = File::exists($logPath) ? round(filesize($logPath) / 1024, 1) . ' KB' : '0 KB';
         $logLines = File::exists($logPath) ? count(file($logPath)) : 0;
 
-        $loginAttempts = LoginAttempt::orderByDesc('last_attempt_at')
-            ->take(50)
-            ->get()
-            ->map(function ($record) {
-                return [
-                    'id'              => $record->id,
-                    'ip_address'      => $record->ip_address,
-                    'email'           => $record->email,
-                    'attempts'        => $record->attempts,
-                    'locked_until'    => $record->locked_until?->toDateTimeString(),
-                    'last_attempt_at' => $record->last_attempt_at?->toDateTimeString(),
-                    'is_locked'       => $record->isCurrentlyLocked(),
-                ];
-            });
-
         return Inertia::render('settings/system-tools', [
             'logStats' => [
                 'size'  => $logSize,
                 'lines' => $logLines,
             ],
-            'loginAttempts' => $loginAttempts,
         ]);
     }
 
@@ -94,17 +77,5 @@ class SystemToolsController extends Controller
         }, $lines);
 
         return response()->json(['lines' => $parsed]);
-    }
-
-    public function unblockIp(int $id)
-    {
-        LoginAttempt::where('id', $id)->delete();
-        return redirect()->back()->with('success', 'IP address unblocked successfully.');
-    }
-
-    public function clearAllAttempts()
-    {
-        LoginAttempt::truncate();
-        return redirect()->back()->with('success', 'All login attempt records cleared.');
     }
 }

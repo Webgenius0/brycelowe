@@ -1,17 +1,11 @@
 import { Head, useForm } from '@inertiajs/react';
-import { Settings2, Globe, Plus, Trash2 } from 'lucide-react';
+import { Settings2 } from 'lucide-react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import ImageUpload from '@/components/ui/imageUpload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-type SocialLink = {
-    platform: string;
-    url: string;
-    icon?: string;
-};
 
 type Props = {
     setting: {
@@ -25,7 +19,6 @@ type Props = {
         phone: string;
         email: string;
         address: string;
-        social_links?: SocialLink[];
     } | null;
 };
 
@@ -41,50 +34,7 @@ export default function SystemSettings({ setting }: Props) {
         phone: setting?.phone ?? '',
         email: setting?.email ?? '',
         address: setting?.address ?? '',
-        social_links: (setting?.social_links ?? []) as SocialLink[],
     });
-
-    const addSocialLink = () => {
-        form.setData('social_links', [
-            ...form.data.social_links,
-            { platform: 'Facebook', url: '', icon: 'facebook' },
-        ]);
-    };
-
-    const removeSocialLink = (index: number) => {
-        form.setData(
-            'social_links',
-            form.data.social_links.filter((_, i) => i !== index),
-        );
-    };
-
-    const updateSocialLink = (
-        index: number,
-        key: keyof SocialLink,
-        value: string,
-    ) => {
-        const updated = [...form.data.social_links];
-        updated[index] = {
-            ...updated[index],
-            [key]: value,
-        };
-
-        if (key === 'platform') {
-            const platformIcons: Record<string, string> = {
-                Facebook: 'facebook',
-                Instagram: 'instagram',
-                Twitter: 'twitter',
-                YouTube: 'youtube',
-                LinkedIn: 'linkedin',
-                TikTok: 'music',
-                Pinterest: 'pin',
-                Custom: 'link',
-            };
-            updated[index].icon = platformIcons[value] || 'link';
-        }
-
-        form.setData('social_links', updated);
-    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -272,159 +222,6 @@ export default function SystemSettings({ setting }: Props) {
                             />
                             <InputError message={form.errors.favicon} />
                         </div>
-                    </div>
-
-                    {/* ───────────────────── SOCIAL LINKS ───────────────────── */}
-                    <div className="space-y-4 rounded-xl border border-sidebar-border bg-card p-5 shadow-sm">
-                        <div className="flex items-center justify-between border-b border-border/50 pb-3">
-                            <div className="flex items-center gap-3">
-                                <div className="flex size-9 items-center justify-center rounded-lg bg-violet-500/10">
-                                    <Globe className="size-5 text-violet-600 dark:text-violet-400" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium">
-                                        Social Links
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        Manage your website social media profile
-                                        links
-                                    </p>
-                                </div>
-                            </div>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={addSocialLink}
-                                className="flex items-center gap-1.5"
-                            >
-                                <Plus className="size-4" />
-                                Add Link
-                            </Button>
-                        </div>
-
-                        {form.data.social_links.length === 0 ? (
-                            <p className="py-6 text-center text-sm text-muted-foreground">
-                                No social links added yet. Click "Add Link" to
-                                get started.
-                            </p>
-                        ) : (
-                            <div className="space-y-3">
-                                {form.data.social_links.map((link, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex flex-col gap-2 rounded-lg border border-border/60 bg-muted/20 p-3 sm:flex-row sm:items-center sm:gap-4"
-                                    >
-                                        <div className="grid gap-1 sm:w-1/4">
-                                            <Label className="text-xs">
-                                                Platform
-                                            </Label>
-                                            <select
-                                                value={link.platform}
-                                                onChange={(e) =>
-                                                    updateSocialLink(
-                                                        index,
-                                                        'platform',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-                                            >
-                                                <option value="Facebook">
-                                                    Facebook
-                                                </option>
-                                                <option value="Instagram">
-                                                    Instagram
-                                                </option>
-                                                <option value="Twitter">
-                                                    Twitter / X
-                                                </option>
-                                                <option value="YouTube">
-                                                    YouTube
-                                                </option>
-                                                <option value="LinkedIn">
-                                                    LinkedIn
-                                                </option>
-                                                <option value="TikTok">
-                                                    TikTok
-                                                </option>
-                                                <option value="Pinterest">
-                                                    Pinterest
-                                                </option>
-                                                <option value="Custom">
-                                                    Custom
-                                                </option>
-                                            </select>
-                                        </div>
-
-                                        <div className="grid flex-1 gap-1">
-                                            <Label className="text-xs">
-                                                Profile URL
-                                            </Label>
-                                            <Input
-                                                type="url"
-                                                value={link.url}
-                                                onChange={(e) =>
-                                                    updateSocialLink(
-                                                        index,
-                                                        'url',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                placeholder="https://example.com/username"
-                                                className="h-9"
-                                            />
-                                            {form.errors[
-                                                `social_links.${index}.url` as any
-                                            ] && (
-                                                <p className="text-xs text-red-500">
-                                                    {
-                                                        form.errors[
-                                                            `social_links.${index}.url` as any
-                                                        ]
-                                                    }
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        {link.platform === 'Custom' && (
-                                            <div className="grid gap-1 sm:w-1/5">
-                                                <Label className="text-xs">
-                                                    Icon Name (Lucide)
-                                                </Label>
-                                                <Input
-                                                    type="text"
-                                                    value={link.icon || ''}
-                                                    onChange={(e) =>
-                                                        updateSocialLink(
-                                                            index,
-                                                            'icon',
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    placeholder="e.g. facebook"
-                                                    className="h-9"
-                                                />
-                                            </div>
-                                        )}
-
-                                        <div className="flex items-end justify-end sm:h-14">
-                                            <Button
-                                                type="button"
-                                                variant="destructive"
-                                                size="icon"
-                                                onClick={() =>
-                                                    removeSocialLink(index)
-                                                }
-                                                className="h-9 w-9"
-                                            >
-                                                <Trash2 className="size-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
                     </div>
 
                     <div className="flex items-center gap-4">

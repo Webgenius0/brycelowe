@@ -37,6 +37,12 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
         );
+
+        // Globally intercept all outgoing emails and prevent sending to dummy/test addresses
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Mail\Events\MessageSending::class,
+            \App\Listeners\BlockTestEmailsListener::class
+        );
     }
 
     /**

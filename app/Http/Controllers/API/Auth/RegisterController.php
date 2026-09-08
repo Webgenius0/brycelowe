@@ -60,38 +60,6 @@ class RegisterController extends Controller
                 ]);
             }
 
-            // Link any gifted subscriptions purchased before they registered
-            $giftedSubscriptions = \App\Models\Subscription::where('recipient_email', $user->email)
-                ->whereNull('user_id')
-                ->get();
-
-            foreach ($giftedSubscriptions as $sub) {
-                $sub->update(['user_id' => $user->id]);
-
-                // Find the associated Plan to credit points
-                $plan = \App\Models\Plan::where('stripe_price_id', $sub->stripe_price)->first()
-                    ?? \App\Models\Plan::where('title', $sub->type)->first();
-
-                if ($plan) {
-                    $user->update([
-                        'points' => ($user->points ?? 0) + ($plan->points ?? 0),
-                        'points_valid_till' => \Carbon\Carbon::now()->addDays($plan->duration ?? 30),
-                    ]);
-                }
-
-                // Notify user of gifted pass linking
-                try {
-                    $buyerName = $sub->buyer?->name ?? 'A friend';
-                    $user->notify(new \App\Notifications\CustomNotification(
-                        'Gift Pass Linked!',
-                        "Your gifted pass '{$sub->type}' from {$buyerName} has been linked to your account. Enjoy!",
-                        '/memberships/' . $sub->id
-                    ));
-                } catch (\Exception $e) {
-                    Log::error('Failed to send registration gift link notification: ' . $e->getMessage());
-                }
-            }
-
             DB::commit();
 
             $otpToken = null;

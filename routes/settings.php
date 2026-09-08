@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Settings\LoginAttemptsController;
 use App\Http\Controllers\Settings\MailSettingsController;
 use App\Http\Controllers\Settings\MultiTwoFactorController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
+use App\Http\Controllers\Settings\SocialLinksController;
 use App\Http\Controllers\Settings\StripeSettingsController;
 use App\Http\Controllers\Settings\SystemSettingsController;
 use App\Http\Controllers\Settings\SystemToolsController;
@@ -28,6 +30,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
     Route::inertia('settings/docs', 'settings/docs')->name('settings.docs');
 
+    Route::get('settings/social-links', [SocialLinksController::class, 'edit'])->name('social-links.edit');
+    Route::patch('settings/social-links', [SocialLinksController::class, 'update'])->name('social-links.update');
+
     Route::get('settings/stripe', [StripeSettingsController::class, 'edit'])->name('stripe.edit');
     Route::patch('settings/stripe', [StripeSettingsController::class, 'update'])->name('stripe.update');
 
@@ -45,12 +50,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('settings/passkeys', [MultiTwoFactorController::class, 'storePasskey'])->name('passkeys.store');
     Route::delete('settings/passkeys/{id}', [MultiTwoFactorController::class, 'deletePasskey'])->name('passkeys.destroy');
 
+    // Login Attempts & IP Management
+    Route::get('settings/login-attempts', [LoginAttemptsController::class, 'index'])->name('login-attempts.index');
+    Route::post('settings/login-attempts/unblock/{id}', [LoginAttemptsController::class, 'unblockIp'])->name('login-attempts.unblock');
+    Route::post('settings/login-attempts/clear-all', [LoginAttemptsController::class, 'clearAll'])->name('login-attempts.clear-all');
+
     // System Tools
     Route::get('settings/system-tools', [SystemToolsController::class, 'index'])->name('system-tools.index');
     Route::post('settings/system-tools/optimize-clear', [SystemToolsController::class, 'optimizeClear'])->name('system-tools.optimize-clear');
     Route::post('settings/system-tools/optimize', [SystemToolsController::class, 'optimize'])->name('system-tools.optimize');
     Route::post('settings/system-tools/clear-logs', [SystemToolsController::class, 'clearLogs'])->name('system-tools.clear-logs');
     Route::get('settings/system-tools/logs', [SystemToolsController::class, 'logs'])->name('system-tools.logs');
-    Route::post('settings/system-tools/unblock-ip/{id}', [SystemToolsController::class, 'unblockIp'])->name('system-tools.unblock-ip');
-    Route::post('settings/system-tools/clear-attempts', [SystemToolsController::class, 'clearAllAttempts'])->name('system-tools.clear-attempts');
 });

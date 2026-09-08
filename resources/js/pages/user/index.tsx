@@ -463,44 +463,9 @@ function DeleteUserModal({
     );
 }
 
-const getSubscriptionStatus = (user: User) => {
-    if (!user.subscriptions || user.subscriptions.length === 0) {
-        return { hasPlan: false, planName: 'None', status: 'None', isActive: false };
-    }
 
-    // Find first active subscription if any exists
-    const activeSub = user.subscriptions.find(sub => {
-        const isStatusActive = sub.stripe_status === 'active';
-        const endsAtDate = sub.ends_at ? new Date(sub.ends_at) : null;
-        const isFuture = endsAtDate ? endsAtDate > new Date() : false;
-        return isStatusActive && isFuture;
-    });
-
-    if (activeSub) {
-        return {
-            hasPlan: true,
-            planName: activeSub.type || 'Standard',
-            status: 'Active',
-            isActive: true
-        };
-    }
-
-    // Fallback to the latest non-active subscription if any exists
-    const latestSub = user.subscriptions[0];
-    let statusText = 'Expired';
-    if (latestSub.stripe_status === 'canceled') statusText = 'Canceled';
-    else if (latestSub.stripe_status === 'unpaid') statusText = 'Unpaid';
-
-    return {
-        hasPlan: true,
-        planName: latestSub.type || 'Standard',
-        status: statusText,
-        isActive: false
-    };
-};
-
-// --- Subscription History Modal ---
-function SubscriptionHistoryModal({
+// --- User Profile Details Modal ---
+function UserDetailsModal({
     user,
     open,
     onClose,
@@ -511,15 +476,13 @@ function SubscriptionHistoryModal({
 }) {
     if (!user) return null;
 
-    const subs = user.subscriptions ?? [];
-
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader className="sr-only">
-                    <DialogTitle>User Profile & Subscription History</DialogTitle>
+                    <DialogTitle>User Profile</DialogTitle>
                     <DialogDescription>
-                        Detailed profile details and subscription purchases.
+                        Detailed user profile information.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -532,7 +495,7 @@ function SubscriptionHistoryModal({
                             className="size-14 rounded-full object-cover border border-border shadow-sm"
                         />
                     ) : (
-                        <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-lg font-bold border border-border shadow-sm">
+                        <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#0EADAB]/10 text-[#0EADAB] text-lg font-bold border border-border shadow-sm">
                             {user.name.charAt(0).toUpperCase()}
                         </div>
                     )}
@@ -563,14 +526,12 @@ function SubscriptionHistoryModal({
                         </span>
                     </div>
                     <div>
-                        <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Points Balance</span>
-                        <span className="font-semibold text-amber-600 dark:text-amber-400 mt-0.5 block">
-                            {user.points ?? 0} pts (€{Number(user.points ?? 0).toFixed(2)})
-                        </span>
-                    </div>
-                    <div>
                         <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Phone</span>
                         <span className="text-foreground mt-0.5 block">{user.phone ? formatPhone(user.phone) : '—'}</span>
+                    </div>
+                    <div>
+                        <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Address</span>
+                        <span className="text-foreground mt-0.5 block truncate">{user.address ?? '—'}</span>
                     </div>
                     <div>
                         <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Registered</span>
@@ -586,91 +547,6 @@ function SubscriptionHistoryModal({
                                 : '—'}
                         </span>
                     </div>
-                    <div>
-                        <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Last Login</span>
-                        <span className="text-xs text-muted-foreground mt-0.5 block">
-                            {user.last_login_at
-                                ? new Date(user.last_login_at).toLocaleDateString('en-GB', {
-                                      day: '2-digit',
-                                      month: 'short',
-                                      year: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                  })
-                                : '—'}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="space-y-3 mt-4">
-                    <h3 className="text-xs font-bold text-foreground uppercase tracking-wider px-1">Subscription History</h3>
-                    {subs.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
-                            No subscription history found for this user.
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto rounded-lg border border-border">
-                            <table className="w-full text-left text-sm border-collapse">
-                                <thead>
-                                    <tr className="bg-muted/50 border-b border-border">
-                                        <th className="p-3 font-semibold text-muted-foreground text-xs uppercase">Membership ID</th>
-                                        <th className="p-3 font-semibold text-muted-foreground text-xs uppercase">Type / Plan</th>
-                                        <th className="p-3 font-semibold text-muted-foreground text-xs uppercase">Quantity</th>
-                                        <th className="p-3 font-semibold text-muted-foreground text-xs uppercase">Status</th>
-                                        <th className="p-3 font-semibold text-muted-foreground text-xs uppercase">Valid Till</th>
-                                        <th className="p-3 font-semibold text-muted-foreground text-xs uppercase">Purchased</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border">
-                                    {subs.map((sub) => {
-                                        const endsAtDate = sub.ends_at ? new Date(sub.ends_at) : null;
-                                        const isStatusActive = sub.stripe_status === 'active';
-                                        const isActive = isStatusActive && (endsAtDate ? endsAtDate > new Date() : false);
-
-                                        let statusLabel = 'Expired';
-                                        if (isActive) statusLabel = 'Active';
-                                        else if (sub.stripe_status === 'canceled') statusLabel = 'Canceled';
-                                        else if (sub.stripe_status === 'unpaid') statusLabel = 'Unpaid';
-
-                                        return (
-                                            <tr key={sub.id} className="hover:bg-muted/30 transition-colors">
-                                                <td className="p-3 font-mono text-xs">{sub.membership_id || `SUB-${sub.id}`}</td>
-                                                <td className="p-3 font-medium text-foreground">{sub.type}</td>
-                                                <td className="p-3">{sub.quantity ?? 1}</td>
-                                                <td className="p-3">
-                                                    <span
-                                                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                                                            isActive
-                                                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                                                                : 'bg-red-500/10 text-red-600 dark:text-red-400'
-                                                        }`}
-                                                    >
-                                                        {statusLabel}
-                                                    </span>
-                                                </td>
-                                                <td className="p-3 text-xs text-muted-foreground">
-                                                    {sub.ends_at
-                                                        ? new Date(sub.ends_at).toLocaleDateString('en-GB', {
-                                                              day: '2-digit',
-                                                              month: 'short',
-                                                              year: 'numeric',
-                                                          })
-                                                        : '—'}
-                                                </td>
-                                                <td className="p-3 text-xs text-muted-foreground">
-                                                    {new Date(sub.created_at).toLocaleDateString('en-GB', {
-                                                        day: '2-digit',
-                                                        month: 'short',
-                                                        year: 'numeric',
-                                                    })}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
                 </div>
 
                 <DialogFooter>
@@ -688,7 +564,7 @@ export default function UsersPage({ users, analytics, filters }: Props) {
     const [createOpen, setCreateOpen] = useState(false);
     const [editUser, setEditUser] = useState<User | null>(null);
     const [deleteUser, setDeleteUser] = useState<User | null>(null);
-    const [viewingUserSubscriptions, setViewingUserSubscriptions] = useState<User | null>(null);
+    const [viewingUser, setViewingUser] = useState<User | null>(null);
 
     const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         router.get(
@@ -724,42 +600,6 @@ export default function UsersPage({ users, analytics, filters }: Props) {
         { key: 'email', title: 'Email' },
         { key: 'role', title: 'Role' },
         {
-            key: 'subscription',
-            title: 'Plan / Subscription',
-            sortable: false,
-            render: (row: User) => {
-                const subInfo = getSubscriptionStatus(row);
-                return (
-                    <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-foreground">
-                            {subInfo.planName}
-                        </span>
-                        <span
-                            className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-semibold mt-0.5 ${
-                                subInfo.isActive
-                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                                    : subInfo.hasPlan
-                                      ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                                      : 'bg-muted text-muted-foreground'
-                            }`}
-                        >
-                            {subInfo.hasPlan ? subInfo.status : 'No Plan'}
-                        </span>
-                    </div>
-                );
-            }
-        },
-        {
-            key: 'points',
-            title: 'Points Balance',
-            sortable: true,
-            render: (row: User) => (
-                <span className="font-semibold text-xs text-amber-600 dark:text-amber-400">
-                    {row.points ?? 0} pts (€{Number(row.points ?? 0).toFixed(2)})
-                </span>
-            ),
-        },
-        {
             key: 'phone',
             title: 'Phone',
             render: (row: User) => (
@@ -783,28 +623,6 @@ export default function UsersPage({ users, analytics, filters }: Props) {
                 </span>
             ),
         },
-        // {
-        //     key: 'orders_count',
-        //     title: 'Orders',
-        //     render: (row: User) => (
-        //         <span className="font-semibold text-xs text-foreground">
-        //             {row.orders_count ?? 0}
-        //         </span>
-        //     ),
-        // },
-        // {
-        //     key: 'orders_sum_total',
-        //     title: 'Total Value',
-        //     render: (row: User) => (
-        //         <span className="font-bold text-xs text-violet-600 dark:text-violet-400">
-        //             £{row.orders_sum_total ? Number(row.orders_sum_total).toFixed(2) : '0.00'}
-        //         </span>
-        //     ),
-        // },
-        // {
-        //     key: 'status',
-        // ...
-        // },
         {
             key: 'status',
             title: 'Status',
@@ -833,8 +651,8 @@ export default function UsersPage({ users, analytics, filters }: Props) {
                         variant="ghost"
                         size="icon"
                         className="size-8 text-muted-foreground hover:text-primary"
-                        onClick={() => setViewingUserSubscriptions(row)}
-                        title="View Subscription History"
+                        onClick={() => setViewingUser(row)}
+                        title="View Profile Details"
                     >
                         <Eye className="size-3.5" />
                     </Button>
@@ -976,10 +794,10 @@ export default function UsersPage({ users, analytics, filters }: Props) {
                 open={!!deleteUser}
                 onClose={() => setDeleteUser(null)}
             />
-            <SubscriptionHistoryModal
-                user={viewingUserSubscriptions}
-                open={!!viewingUserSubscriptions}
-                onClose={() => setViewingUserSubscriptions(null)}
+            <UserDetailsModal
+                user={viewingUser}
+                open={!!viewingUser}
+                onClose={() => setViewingUser(null)}
             />
         </>
     );

@@ -25,22 +25,11 @@ interface LogLine {
         | 'debug';
 }
 
-interface LoginAttemptRecord {
-    id: number;
-    ip_address: string;
-    email: string | null;
-    attempts: number;
-    locked_until: string | null;
-    last_attempt_at: string | null;
-    is_locked: boolean;
-}
-
 interface Props {
     logStats: {
         size: string;
         lines: number;
     };
-    loginAttempts: LoginAttemptRecord[];
 }
 
 const LEVEL_STYLES: Record<string, string> = {
@@ -63,7 +52,7 @@ const LEVEL_BADGE: Record<string, string> = {
 
 type ToolKey = 'optimize-clear' | 'optimize' | 'clear-logs';
 
-export default function SystemTools({ logStats, loginAttempts }: Props) {
+export default function SystemTools({ logStats }: Props) {
     const { flash } = usePage<{ flash: { success?: string; error?: string } }>()
         .props as any;
     const [loading, setLoading] = useState<Record<ToolKey, boolean>>({
@@ -158,10 +147,11 @@ export default function SystemTools({ logStats, loginAttempts }: Props) {
         <>
             <Head title="System Tools" />
 
-            <div className="space-y-8">
+            <div className="space-y-6">
                 <Heading
-                    title="System Tools"
-                    description="Manage Laravel caches, optimization, and view application logs."
+                    variant="small"
+                    title="System Tools & Maintenance"
+                    description="Manage Laravel caches, optimization commands, and inspect application logs"
                 />
 
                 {/* Flash Messages */}
@@ -180,14 +170,14 @@ export default function SystemTools({ logStats, loginAttempts }: Props) {
 
                 {/* Quick Actions */}
                 <div className="space-y-3">
-                    <h3 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-                        Quick Actions
+                    <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                        Quick Maintenance Actions
                     </h3>
                     <div className="grid gap-4 sm:grid-cols-3">
                         {tools.map((tool) => (
                             <div
                                 key={tool.key}
-                                className="flex h-full flex-col justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-sm"
+                                className="flex h-full flex-col justify-between gap-4 rounded-xl border border-sidebar-border bg-card p-5 shadow-2xs"
                             >
                                 <div className="flex flex-1 items-start gap-3">
                                     <div className="mt-0.5 shrink-0 rounded-lg border border-border bg-muted p-2 text-muted-foreground">
@@ -212,7 +202,7 @@ export default function SystemTools({ logStats, loginAttempts }: Props) {
                                 >
                                     {loading[tool.key] ? (
                                         <>
-                                            <Loader2 className="size-4 animate-spin" />
+                                            <Loader2 className="size-4 animate-spin mr-1.5" />
                                             Running...
                                         </>
                                     ) : (
@@ -225,10 +215,10 @@ export default function SystemTools({ logStats, loginAttempts }: Props) {
                 </div>
 
                 {/* Laravel Log Viewer */}
-                <div className="space-y-3">
+                <div className="space-y-3 pt-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
-                            <h3 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                            <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                 Laravel Log Viewer
                             </h3>
                             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -242,61 +232,87 @@ export default function SystemTools({ logStats, loginAttempts }: Props) {
                                 placeholder="Filter logs..."
                                 value={logFilter}
                                 onChange={(e) => setLogFilter(e.target.value)}
-                                className="h-8 w-48 rounded-md border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-ring focus:outline-none"
+                                className="h-8 w-56 rounded-md border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-ring focus:outline-none"
                             />
                             <Button
                                 id="btn-refresh-logs"
                                 variant="outline"
                                 size="sm"
-                                onClick={fetchLogs}
                                 disabled={logLoading}
+                                onClick={fetchLogs}
+                                className="h-8 gap-1 text-xs"
                             >
-                                {logLoading ? (
-                                    <Loader2 className="size-4 animate-spin" />
-                                ) : (
-                                    <RefreshCw className="size-4" />
-                                )}
+                                <RefreshCw
+                                    className={`size-3.5 ${
+                                        logLoading ? 'animate-spin' : ''
+                                    }`}
+                                />
+                                Refresh
                             </Button>
                         </div>
                     </div>
 
-                    {/* Level legend */}
-                    <div className="flex flex-wrap gap-2">
+                    {/* Filter level chips */}
+                    <div className="flex flex-wrap gap-1.5">
                         {['error', 'warning', 'info', 'debug'].map((lvl) => (
-                            <span
+                            <button
                                 key={lvl}
-                                className={`inline-flex items-center rounded border px-2 py-0.5 text-xs font-medium ${LEVEL_BADGE[lvl]}`}
+                                type="button"
+                                onClick={() =>
+                                    setLogFilter((prev) =>
+                                        prev.toLowerCase() === lvl ? '' : lvl,
+                                    )
+                                }
+                                className={`rounded border px-2 py-0.5 text-xs font-mono font-medium transition cursor-pointer ${
+                                    logFilter.toLowerCase() === lvl
+                                        ? LEVEL_BADGE[lvl]
+                                        : 'border-border bg-muted/40 text-muted-foreground hover:bg-muted'
+                                }`}
                             >
                                 {lvl.toUpperCase()}
-                            </span>
+                            </button>
                         ))}
+                        {logFilter && (
+                            <button
+                                type="button"
+                                onClick={() => setLogFilter('')}
+                                className="rounded border border-border px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                            >
+                                Clear filter
+                            </button>
+                        )}
                     </div>
 
-                    {/* Log terminal */}
+                    {/* Terminal Window */}
                     <div
                         ref={logRef}
-                        className="h-[460px] overflow-y-auto rounded-xl border border-border bg-[#0d0d0d] p-4 font-mono text-xs leading-5 shadow-inner"
+                        className="h-[520px] overflow-auto rounded-xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs text-zinc-100 shadow-inner"
                     >
-                        {logLoading ? (
-                            <div className="flex h-full items-center justify-center text-muted-foreground">
-                                <Loader2 className="mr-2 size-5 animate-spin" />{' '}
+                        {logLoading && logLines.length === 0 ? (
+                            <div className="flex h-full items-center justify-center gap-2 text-zinc-400">
+                                <Loader2 className="size-4 animate-spin" />
                                 Loading logs...
                             </div>
                         ) : filteredLines.length === 0 ? (
-                            <div className="flex h-full items-center justify-center text-muted-foreground">
+                            <div className="flex h-full items-center justify-center text-zinc-500">
                                 {logLines.length === 0
-                                    ? 'Log file is empty.'
+                                    ? 'Log file is currently empty.'
                                     : 'No lines match your filter.'}
                             </div>
                         ) : (
-                            filteredLines.map((line, i) => (
-                                <div
-                                    key={i}
-                                    className={`break-all whitespace-pre-wrap ${LEVEL_STYLES[line.level] ?? 'text-slate-300'}`}
-                                >
-                                    {line.text}
-                                </div>
-                            ))
+                            <div className="space-y-1">
+                                {filteredLines.map((line, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`leading-relaxed whitespace-pre-wrap break-all ${
+                                            LEVEL_STYLES[line.level] ||
+                                            'text-zinc-300'
+                                        }`}
+                                    >
+                                        {line.text}
+                                    </div>
+                                ))}
+                            </div>
                         )}
                     </div>
 
@@ -311,140 +327,11 @@ export default function SystemTools({ logStats, loginAttempts }: Props) {
                                     behavior: 'smooth',
                                 })
                             }
+                            className="text-xs text-muted-foreground"
                         >
                             ↓ Scroll to Bottom
                         </Button>
                     </div>
-                </div>
-
-                {/* Login Attempts */}
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-                                Login Attempts
-                            </h3>
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                                Last 50 records · IP-based lockout tracker
-                            </p>
-                        </div>
-                        {loginAttempts.length > 0 && (
-                            <Button
-                                id="btn-clear-attempts"
-                                variant="destructive"
-                                size="sm"
-                                onClick={() =>
-                                    router.post(
-                                        '/settings/system-tools/clear-attempts',
-                                        {},
-                                        { preserveScroll: true },
-                                    )
-                                }
-                            >
-                                <Trash2 className="mr-1 size-4" />
-                                Clear All
-                            </Button>
-                        )}
-                    </div>
-
-                    {loginAttempts.length === 0 ? (
-                        <div className="rounded-xl border border-border bg-muted/30 py-10 text-center text-sm text-muted-foreground">
-                            No login attempts recorded yet.
-                        </div>
-                    ) : (
-                        <div className="overflow-auto rounded-xl border border-border">
-                            <table className="w-full text-xs">
-                                <thead className="bg-muted/50 text-left">
-                                    <tr>
-                                        <th className="px-4 py-2 font-semibold text-muted-foreground">
-                                            IP Address
-                                        </th>
-                                        <th className="px-4 py-2 font-semibold text-muted-foreground">
-                                            Email
-                                        </th>
-                                        <th className="px-4 py-2 font-semibold text-muted-foreground">
-                                            Attempts
-                                        </th>
-                                        <th className="px-4 py-2 font-semibold text-muted-foreground">
-                                            Status
-                                        </th>
-                                        <th className="px-4 py-2 font-semibold text-muted-foreground">
-                                            Locked Until
-                                        </th>
-                                        <th className="px-4 py-2 font-semibold text-muted-foreground">
-                                            Last Attempt
-                                        </th>
-                                        <th className="px-4 py-2 font-semibold text-muted-foreground">
-                                            Action
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border">
-                                    {loginAttempts.map((rec) => (
-                                        <tr
-                                            key={rec.id}
-                                            className="bg-card transition-colors hover:bg-muted/20"
-                                        >
-                                            <td className="px-4 py-2 font-mono">
-                                                {rec.ip_address}
-                                            </td>
-                                            <td className="px-4 py-2 text-muted-foreground">
-                                                {rec.email ?? '—'}
-                                            </td>
-                                            <td className="px-4 py-2">
-                                                <span
-                                                    className={`font-semibold ${
-                                                        rec.attempts >= 10
-                                                            ? 'text-red-500'
-                                                            : rec.attempts >= 5
-                                                              ? 'text-amber-500'
-                                                              : 'text-foreground'
-                                                    }`}
-                                                >
-                                                    {rec.attempts}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-2">
-                                                {rec.is_locked ? (
-                                                    <span className="inline-flex items-center rounded border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400">
-                                                        🔒 Locked
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center rounded border border-green-500/30 bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-400">
-                                                        ✓ Active
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-2 text-muted-foreground">
-                                                {rec.locked_until ?? '—'}
-                                            </td>
-                                            <td className="px-4 py-2 text-muted-foreground">
-                                                {rec.last_attempt_at ?? '—'}
-                                            </td>
-                                            <td className="px-4 py-2">
-                                                <Button
-                                                    id={`btn-unblock-${rec.id}`}
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        router.post(
-                                                            `/settings/system-tools/unblock-ip/${rec.id}`,
-                                                            {},
-                                                            {
-                                                                preserveScroll: true,
-                                                            },
-                                                        )
-                                                    }
-                                                >
-                                                    Unblock
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
                 </div>
             </div>
         </>

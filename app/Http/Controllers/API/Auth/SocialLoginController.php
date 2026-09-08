@@ -90,25 +90,6 @@ class SocialLoginController extends Controller
                     'role' => $role,
                     'status' => 'Active',
                 ]);
-
-                // Link any gifted subscriptions purchased before they registered
-                $giftedSubscriptions = \App\Models\Subscription::where('recipient_email', $user->email)
-                    ->whereNull('user_id')
-                    ->get();
-
-                foreach ($giftedSubscriptions as $sub) {
-                    $sub->update(['user_id' => $user->id]);
-
-                    $plan = \App\Models\Plan::where('stripe_price_id', $sub->stripe_price)->first()
-                        ?? \App\Models\Plan::where('title', $sub->type)->first();
-
-                    if ($plan) {
-                        $user->update([
-                            'points' => ($user->points ?? 0) + ($plan->points ?? 0),
-                            'points_valid_till' => \Carbon\Carbon::now()->addDays($plan->duration ?? 30),
-                        ]);
-                    }
-                }
             } else {
                 if (empty($user->avatar) && $avatar) {
                     $user->update(['avatar' => $avatar]);

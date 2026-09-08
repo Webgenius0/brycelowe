@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('system_settings', function (Blueprint $table) {
             $table->id();
             $table->string('site_title')->nullable();
-            $table->string('site_name')->nullable();
             $table->string('copyright_text')->nullable();
             $table->text('logo')->nullable();
             $table->text('favicon')->nullable();
@@ -23,6 +22,8 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->longText('description')->nullable();
             $table->json('social_links')->nullable();
+            $table->string('apple_store_link')->nullable();
+            $table->string('play_store_link')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

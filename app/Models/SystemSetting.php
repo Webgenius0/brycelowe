@@ -24,6 +24,8 @@ class SystemSetting extends Model
         'address',
         'description',
         'social_links',
+        'apple_store_link',
+        'play_store_link',
     ];
 
     protected $casts = [

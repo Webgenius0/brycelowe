@@ -12,7 +12,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with(['subscriptions']);
+        $query = User::query();
 
         // 🔎 Search
         if ($request->search) {
@@ -144,13 +144,7 @@ class UserController extends Controller
             'Name',
             'Email',
             'Phone',
-            'Points Balance',
-            'Home Address',
-            'Street Address',
-            'City',
-            'Postal',
-            'Country',
-            'Default Shipping',
+            'Address',
             'Terms Accepted',
             'Role',
             'Status',
@@ -163,13 +157,7 @@ class UserController extends Controller
                 $user->name,
                 $user->email,
                 $user->phone ?? 'N/A',
-                $user->points ?? 0,
-                $user->home_address ?? 'N/A',
-                $user->street_address ?? 'N/A',
-                $user->city ?? 'N/A',
-                $user->postal ?? 'N/A',
-                $user->country ?? 'N/A',
-                $user->default_shipping_address ? 'Yes' : 'No',
+                $user->address ?? 'N/A',
                 $user->terms ? 'Yes' : 'No',
                 $user->role,
                 $user->status,

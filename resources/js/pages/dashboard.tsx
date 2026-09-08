@@ -5,19 +5,28 @@ import {
     TrendingDown,
     Calendar,
     ChevronDown,
-    Building2,
-    Gift,
-    DollarSign,
-    Layers,
     UserCheck,
     Shield,
-    Store,
+    Activity,
+    PieChart as PieChartIcon,
+    Sparkles,
+    ShieldAlert,
+    CheckCircle2,
+    Lock,
+    Globe,
+    Zap,
 } from 'lucide-react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import {
-    ComposedChart,
-    Line,
+    AreaChart,
     Area,
+    BarChart,
+    Bar,
+    LineChart,
+    Line,
+    PieChart,
+    Pie,
+    Cell,
     XAxis,
     YAxis,
     CartesianGrid,
@@ -54,6 +63,7 @@ type Stats = {
     total_partners: number;
     total_customers: number;
     trend_label?: string;
+    active_users_trend?: number;
 };
 
 type RecentUser = {
@@ -70,8 +80,8 @@ type ChartPoint = {
     fullMonth?: string;
     subscribers?: number;
     users: number;
-    businesses: number;
-    redemptions: number;
+    businesses?: number;
+    redemptions?: number;
 };
 
 type Props = {
@@ -85,354 +95,132 @@ type Props = {
     };
 };
 
-const BAR_COLORS = [
-    '#8b5cf6', // violet
-    '#06b6d4', // cyan
-    '#f59e0b', // amber
-    '#ec4899', // pink
-    '#10b981', // emerald
-    '#3b82f6', // blue
+// ───────────────────── MOCK DATA FOR CHARTS ─────────────────────
+
+const MONTHLY_MOCK_DATA = [
+    { period: 'Jan', fullPeriod: 'January 2026', totalUsers: 450, activeUsers: 380, newSignups: 95, securityEvents: 14 },
+    { period: 'Feb', fullPeriod: 'February 2026', totalUsers: 620, activeUsers: 510, newSignups: 170, securityEvents: 22 },
+    { period: 'Mar', fullPeriod: 'March 2026', totalUsers: 840, activeUsers: 720, newSignups: 220, securityEvents: 18 },
+    { period: 'Apr', fullPeriod: 'April 2026', totalUsers: 1100, activeUsers: 940, newSignups: 260, securityEvents: 31 },
+    { period: 'May', fullPeriod: 'May 2026', totalUsers: 1450, activeUsers: 1220, newSignups: 350, securityEvents: 25 },
+    { period: 'Jun', fullPeriod: 'June 2026', totalUsers: 1890, activeUsers: 1610, newSignups: 440, securityEvents: 40 },
+    { period: 'Jul', fullPeriod: 'July 2026', totalUsers: 2340, activeUsers: 1980, newSignups: 450, securityEvents: 36 },
+    { period: 'Aug', fullPeriod: 'August 2026', totalUsers: 2850, activeUsers: 2420, newSignups: 510, securityEvents: 48 },
+    { period: 'Sep', fullPeriod: 'September 2026', totalUsers: 3420, activeUsers: 2950, newSignups: 570, securityEvents: 52 },
+    { period: 'Oct', fullPeriod: 'October 2026', totalUsers: 4100, activeUsers: 3580, newSignups: 680, securityEvents: 60 },
+    { period: 'Nov', fullPeriod: 'November 2026', totalUsers: 4890, activeUsers: 4250, newSignups: 790, securityEvents: 68 },
+    { period: 'Dec', fullPeriod: 'December 2026', totalUsers: 5750, activeUsers: 5040, newSignups: 860, securityEvents: 75 },
 ];
 
-const ANIMATION = {
+const WEEKLY_MOCK_DATA = [
+    { period: 'W1', fullPeriod: 'Week 1', totalUsers: 3820, activeUsers: 3200, newSignups: 140, securityEvents: 15 },
+    { period: 'W2', fullPeriod: 'Week 2', totalUsers: 4010, activeUsers: 3450, newSignups: 190, securityEvents: 20 },
+    { period: 'W3', fullPeriod: 'Week 3', totalUsers: 4250, activeUsers: 3680, newSignups: 240, securityEvents: 18 },
+    { period: 'W4', fullPeriod: 'Week 4', totalUsers: 4520, activeUsers: 3910, newSignups: 270, securityEvents: 24 },
+    { period: 'W5', fullPeriod: 'Week 5', totalUsers: 4810, activeUsers: 4150, newSignups: 290, securityEvents: 22 },
+    { period: 'W6', fullPeriod: 'Week 6', totalUsers: 5120, activeUsers: 4460, newSignups: 310, securityEvents: 30 },
+    { period: 'W7', fullPeriod: 'Week 7', totalUsers: 5460, activeUsers: 4780, newSignups: 340, securityEvents: 28 },
+    { period: 'W8', fullPeriod: 'Week 8', totalUsers: 5750, activeUsers: 5040, newSignups: 390, securityEvents: 35 },
+];
+
+const DAILY_MOCK_DATA = [
+    { period: 'Day 1', fullPeriod: 'Mar 1', totalUsers: 5100, activeUsers: 4520, newSignups: 42, securityEvents: 5 },
+    { period: 'Day 2', fullPeriod: 'Mar 2', totalUsers: 5145, activeUsers: 4560, newSignups: 45, securityEvents: 7 },
+    { period: 'Day 3', fullPeriod: 'Mar 3', totalUsers: 5195, activeUsers: 4610, newSignups: 50, securityEvents: 4 },
+    { period: 'Day 4', fullPeriod: 'Mar 4', totalUsers: 5240, activeUsers: 4650, newSignups: 45, securityEvents: 8 },
+    { period: 'Day 5', fullPeriod: 'Mar 5', totalUsers: 5298, activeUsers: 4710, newSignups: 58, securityEvents: 6 },
+    { period: 'Day 6', fullPeriod: 'Mar 6', totalUsers: 5360, activeUsers: 4780, newSignups: 62, securityEvents: 9 },
+    { period: 'Day 7', fullPeriod: 'Mar 7', totalUsers: 5430, activeUsers: 4840, newSignups: 70, securityEvents: 5 },
+    { period: 'Day 8', fullPeriod: 'Mar 8', totalUsers: 5490, activeUsers: 4890, newSignups: 60, securityEvents: 8 },
+    { period: 'Day 9', fullPeriod: 'Mar 9', totalUsers: 5555, activeUsers: 4940, newSignups: 65, securityEvents: 7 },
+    { period: 'Day 10', fullPeriod: 'Mar 10', totalUsers: 5625, activeUsers: 4990, newSignups: 70, securityEvents: 10 },
+    { period: 'Day 11', fullPeriod: 'Mar 11', totalUsers: 5690, activeUsers: 5020, newSignups: 65, securityEvents: 6 },
+    { period: 'Day 12', fullPeriod: 'Mar 12', totalUsers: 5750, activeUsers: 5040, newSignups: 75, securityEvents: 8 },
+];
+
+const ROLE_DONUT_DATA = [
+    { name: 'Standard Users', value: 3450, color: '#0EADAB' },
+    { name: 'Business Partners', value: 890, color: '#3b82f6' },
+    { name: 'Administrators', value: 120, color: '#f59e0b' },
+    { name: 'Staff & Moderators', value: 280, color: '#8b5cf6' },
+];
+
+const ANIMATION_CONFIG = {
     isAnimationActive: true,
-    animationDuration: 1400,
+    animationDuration: 1200,
     animationEasing: 'ease-out' as const,
-    animationBegin: 200,
 };
 
 function useChartTheme() {
     const [colors, setColors] = useState({
-        tick: 'oklch(0.556 0 0)',
-        grid: 'oklch(0.922 0 0)',
-        cursor: 'rgba(0, 0, 0, 0.08)',
-        legend: 'oklch(0.556 0 0)',
-        dotStroke: 'oklch(1 0 0)',
-        foreground: 'oklch(0.145 0 0)',
-        card: 'oklch(1 0 0)',
-        border: 'oklch(0.922 0 0)',
+        tick: '#64748b',
+        grid: 'rgba(203, 213, 225, 0.4)',
+        cursor: 'rgba(14, 173, 171, 0.08)',
+        legend: '#64748b',
+        dotStroke: '#ffffff',
+        foreground: '#0f172a',
+        card: '#ffffff',
+        border: '#e2e8f0',
     });
 
     useEffect(() => {
-        const read = () => {
-            const s = getComputedStyle(document.documentElement);
-            const pick = (name: string, fallback: string) => {
-                const v = s.getPropertyValue(name).trim();
-                return v || fallback;
-            };
+        const updateTheme = () => {
             const isDark = document.documentElement.classList.contains('dark');
-
             setColors({
-                tick: pick(
-                    '--muted-foreground',
-                    isDark ? 'oklch(0.75 0 0)' : 'oklch(0.45 0 0)',
-                ),
-                grid: pick(
-                    '--border',
-                    isDark ? 'oklch(0.32 0 0)' : 'oklch(0.9 0 0)',
-                ),
-                cursor: isDark
-                    ? 'rgba(255, 255, 255, 0.08)'
-                    : 'rgba(0, 0, 0, 0.06)',
-                legend: pick(
-                    '--muted-foreground',
-                    isDark ? 'oklch(0.75 0 0)' : 'oklch(0.45 0 0)',
-                ),
-                dotStroke: pick(
-                    '--card',
-                    isDark ? 'oklch(0.2 0 0)' : 'oklch(1 0 0)',
-                ),
-                foreground: pick(
-                    '--foreground',
-                    isDark ? 'oklch(0.98 0 0)' : 'oklch(0.15 0 0)',
-                ),
-                card: pick(
-                    '--card',
-                    isDark ? 'oklch(0.2 0 0)' : 'oklch(1 0 0)',
-                ),
-                border: pick(
-                    '--border',
-                    isDark ? 'oklch(0.32 0 0)' : 'oklch(0.9 0 0)',
-                ),
+                tick: isDark ? '#94a3b8' : '#64748b',
+                grid: isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(226, 232, 240, 0.6)',
+                cursor: isDark ? 'rgba(14, 173, 171, 0.15)' : 'rgba(14, 173, 171, 0.08)',
+                legend: isDark ? '#94a3b8' : '#64748b',
+                dotStroke: isDark ? '#1e293b' : '#ffffff',
+                foreground: isDark ? '#f8fafc' : '#0f172a',
+                card: isDark ? '#0f172a' : '#ffffff',
+                border: isDark ? '#334155' : '#e2e8f0',
             });
         };
 
-        read();
-
-        const observer = new MutationObserver(read);
+        updateTheme();
+        const observer = new MutationObserver(updateTheme);
         observer.observe(document.documentElement, {
             attributes: true,
             attributeFilter: ['class'],
         });
 
-        const mq = window.matchMedia('(prefers-color-scheme: dark)');
-        mq.addEventListener('change', read);
-
-        return () => {
-            observer.disconnect();
-            mq.removeEventListener('change', read);
-        };
+        return () => observer.disconnect();
     }, []);
 
     return colors;
 }
 
-type AxisTickProps = {
-    x?: number;
-    y?: number;
-    payload?: { value: string };
-    fill: string;
-};
-
-function XAxisTick({ x = 0, y = 0, payload, fill }: AxisTickProps) {
-    return (
-        <text
-            x={x}
-            y={y}
-            dy={14}
-            textAnchor="middle"
-            fill={fill}
-            fontSize={12}
-            fontWeight={600}
-            className="select-none"
-        >
-            {payload?.value}
-        </text>
-    );
-}
-
-function YAxisTick({
-    x = 0,
-    y = 0,
-    payload,
-    fill,
-}: AxisTickProps & { payload?: { value: number } }) {
-    const v = Number(payload?.value ?? 0);
-    const label = v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v;
-
-    return (
-        <text
-            x={x}
-            y={y}
-            dx={-4}
-            textAnchor="end"
-            fill={fill}
-            fontSize={11}
-            className="select-none"
-        >
-            {label}
-        </text>
-    );
-}
-
-function CustomTooltip({
-    active,
-    payload,
-    label,
-}: {
-    active?: boolean;
-    payload?: {
-        name: string;
-        value: number;
-        color: string;
-        dataKey: string;
-        payload?: any;
-    }[];
-    label?: string;
-}) {
+function CustomTooltip({ active, payload, label }: any) {
     if (!active || !payload?.length) return null;
 
-    const point = payload[0]?.payload as ChartPoint | undefined;
+    const dataPoint = payload[0]?.payload;
 
     return (
-        <div className="animate-in rounded-xl border border-border/50 bg-card/80 px-4 py-3 shadow-2xl backdrop-blur-md duration-200 zoom-in-95 fade-in dark:shadow-black/50">
-            <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                {point?.fullMonth ?? label}
+        <div className="rounded-xl border border-border/80 bg-card/95 p-3.5 shadow-xl backdrop-blur-md transition-all">
+            <p className="mb-2 text-xs font-bold tracking-wide text-foreground">
+                {dataPoint?.fullPeriod || label}
             </p>
             <div className="space-y-1.5">
-                {payload.map((entry, index) => (
+                {payload.map((entry: any, index: number) => (
                     <div
-                        key={`${entry.dataKey}-${entry.name}-${index}`}
-                        className="flex items-center justify-between gap-6"
+                        key={`${entry.dataKey}-${index}`}
+                        className="flex items-center justify-between gap-5 text-xs"
                     >
-                        <span className="flex items-center gap-2 text-sm text-foreground">
+                        <span className="flex items-center gap-2 text-muted-foreground">
                             <span
                                 className="size-2.5 rounded-full"
                                 style={{ backgroundColor: entry.color }}
                             />
-                            {entry.name}
+                            {entry.name}:
                         </span>
-                        <span className="text-sm font-bold text-foreground tabular-nums">
-                            {entry.value}
+                        <span className="font-bold text-foreground tabular-nums">
+                            {entry.value?.toLocaleString()}
                         </span>
                     </div>
                 ))}
             </div>
         </div>
-    );
-}
-
-function SystemActivityChart({ data }: { data: ChartPoint[] }) {
-    const [mounted, setMounted] = useState(false);
-    const theme = useChartTheme();
-
-    useEffect(() => {
-        const t = requestAnimationFrame(() => setMounted(true));
-        return () => cancelAnimationFrame(t);
-    }, []);
-
-    if (!mounted) {
-        return (
-            <div className="flex h-[320px] w-full items-center justify-center">
-                <div className="flex gap-2">
-                    {BAR_COLORS.map((c, i) => (
-                        <div
-                            key={i}
-                            className="h-8 w-3 animate-pulse rounded-full"
-                            style={{
-                                backgroundColor: c,
-                                animationDelay: `${i * 120}ms`,
-                            }}
-                        />
-                    ))}
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-                data={data}
-                margin={{ top: 12, right: 12, left: 4, bottom: 8 }}
-            >
-                <defs>
-                    <linearGradient id="usersAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.25} />
-                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="businessesAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.25} />
-                        <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
-                    </linearGradient>
-                </defs>
-
-                <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke={theme.grid}
-                    strokeOpacity={0.85}
-                />
-
-                <XAxis
-                    dataKey="month"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={<XAxisTick fill={theme.tick} />}
-                    height={36}
-                />
-
-                <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={<YAxisTick fill={theme.tick} />}
-                    width={36}
-                    allowDecimals={false}
-                />
-
-                <Tooltip
-                    content={<CustomTooltip />}
-                    cursor={{ fill: theme.cursor, radius: 8 }}
-                />
-
-                <Legend
-                    wrapperStyle={{
-                        paddingTop: 16,
-                        fontSize: 12,
-                        color: theme.legend,
-                    }}
-                    iconType="circle"
-                    formatter={(value) => (
-                        <span style={{ color: theme.legend, fontWeight: 500 }}>
-                            {value}
-                        </span>
-                    )}
-                />
-
-                <Area
-                    type="monotone"
-                    dataKey="subscribers"
-                    fill="url(#usersAreaGrad)"
-                    stroke="none"
-                    tooltipType="none"
-                    legendType="none"
-                    {...ANIMATION}
-                />
-
-                <Line
-                    type="monotone"
-                    dataKey="subscribers"
-                    name="Subscribers"
-                    stroke="#8b5cf6"
-                    strokeWidth={3}
-                    dot={{
-                        r: 5,
-                        fill: '#8b5cf6',
-                        stroke: theme.dotStroke,
-                        strokeWidth: 2,
-                    }}
-                    activeDot={{
-                        r: 8,
-                        fill: '#8b5cf6',
-                        stroke: theme.dotStroke,
-                        strokeWidth: 2,
-                    }}
-                    {...ANIMATION}
-                />
-
-                <Line
-                    type="monotone"
-                    dataKey="redemptions"
-                    name="Redemptions"
-                    stroke="#ec4899"
-                    strokeWidth={3}
-                    dot={{
-                        r: 5,
-                        fill: '#ec4899',
-                        stroke: theme.dotStroke,
-                        strokeWidth: 2,
-                    }}
-                    activeDot={{
-                        r: 8,
-                        fill: '#ec4899',
-                        stroke: theme.dotStroke,
-                        strokeWidth: 2,
-                    }}
-                    {...ANIMATION}
-                />
-
-                <Line
-                    type="monotone"
-                    dataKey="businesses"
-                    name="Businesses"
-                    stroke="#06b6d4"
-                    strokeWidth={3}
-                    dot={{
-                        r: 5,
-                        fill: '#06b6d4',
-                        stroke: theme.dotStroke,
-                        strokeWidth: 2,
-                    }}
-                    activeDot={{
-                        r: 8,
-                        fill: '#06b6d4',
-                        stroke: theme.dotStroke,
-                        strokeWidth: 2,
-                    }}
-                    {...ANIMATION}
-                />
-            </ComposedChart>
-        </ResponsiveContainer>
     );
 }
 
@@ -475,9 +263,6 @@ const formatDateRange = (fromStr?: string, toStr?: string, preset?: string) => {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
         timeZone: 'UTC',
     };
     return `${fromDate.toLocaleDateString('en-US', options)} - ${toDate.toLocaleDateString('en-US', options)}`;
@@ -485,24 +270,30 @@ const formatDateRange = (fromStr?: string, toStr?: string, preset?: string) => {
 
 export default function Dashboard({
     stats,
-    chartData,
+    chartData: _serverChartData,
     recentUsers,
     filters,
 }: Props) {
     const formatTrend = (v: number) => (v >= 0 ? `+${v}%` : `${v}%`);
     const [viewMode, setViewMode] = useState<'lifetime' | 'period'>('period');
+    const [timeframe, setTimeframe] = useState<'monthly' | 'weekly' | 'daily'>('monthly');
+    const [activeMetric, setActiveMetric] = useState<'all' | 'users' | 'signups' | 'security'>('all');
 
-    const detectCurrentPreset = () => {
-        if (filters?.preset) {
-            return filters.preset;
-        }
-        return 'this_month';
-    };
-
+    const theme = useChartTheme();
     const [isOpen, setIsOpen] = useState(false);
     const [tempFrom, setTempFrom] = useState('');
     const [tempTo, setTempTo] = useState('');
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const activeChartData = useMemo(() => {
+        if (timeframe === 'weekly') return WEEKLY_MOCK_DATA;
+        if (timeframe === 'daily') return DAILY_MOCK_DATA;
+        return MONTHLY_MOCK_DATA;
+    }, [timeframe]);
+
+    const totalDonutUsers = useMemo(() => {
+        return ROLE_DONUT_DATA.reduce((acc, curr) => acc + curr.value, 0);
+    }, []);
 
     useEffect(() => {
         if (filters?.from && filters?.to) {
@@ -632,24 +423,25 @@ export default function Dashboard({
         <>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                <div className="flex animate-in items-center justify-between duration-500 fade-in slide-in-from-top-4">
+                {/* ───────────────────── HEADER & FILTERS ───────────────────── */}
+                <div className="flex animate-in items-center justify-between duration-500 fade-in slide-in-from-top-4 flex-wrap gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">
+                        <h1 className="text-2xl font-bold tracking-tight text-foreground">
                             System Overview & Analytics
                         </h1>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground mt-0.5">
                             System overview, user analytics, and platform activity.
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
                         {/* Segmented Control for Lifetime vs Period Mode */}
-                        <div className="inline-flex rounded-lg border border-input bg-muted/50 p-1">
+                        <div className="inline-flex rounded-xl border border-sidebar-border bg-card p-1 shadow-2xs">
                             <button
                                 type="button"
                                 onClick={() => setViewMode('lifetime')}
-                                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
+                                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                                     viewMode === 'lifetime'
-                                        ? 'bg-card text-foreground shadow-xs'
+                                        ? 'bg-[#0EADAB] text-white shadow-xs'
                                         : 'text-muted-foreground hover:text-foreground'
                                 }`}
                             >
@@ -658,9 +450,9 @@ export default function Dashboard({
                             <button
                                 type="button"
                                 onClick={() => setViewMode('period')}
-                                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
+                                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                                     viewMode === 'period'
-                                        ? 'bg-card text-foreground shadow-xs'
+                                        ? 'bg-[#0EADAB] text-white shadow-xs'
                                         : 'text-muted-foreground hover:text-foreground'
                                 }`}
                             >
@@ -672,87 +464,43 @@ export default function Dashboard({
                             <button
                                 type="button"
                                 onClick={() => setIsOpen(!isOpen)}
-                                className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3.5 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-accent hover:shadow-md"
+                                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-sidebar-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground shadow-2xs transition-all hover:bg-accent"
                             >
                                 <Calendar className="size-4 text-[#0EADAB]" />
                                 <span className="max-w-[280px] truncate">
                                     {formatDateRange(filters?.from, filters?.to, filters?.preset)}
                                 </span>
                                 <ChevronDown
-                                    className={`size-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                                    className={`size-3.5 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
                                 />
                             </button>
 
                             {isOpen && (
-                                <div className="absolute right-0 z-50 mt-2 w-[340px] animate-in rounded-xl border border-sidebar-border bg-card p-4 shadow-2xl backdrop-blur-md duration-200 fade-in slide-in-from-top-2 sm:w-[400px]">
+                                <div className="absolute right-0 z-50 mt-2 w-[340px] animate-in rounded-xl border border-sidebar-border bg-card p-4 shadow-2xl backdrop-blur-md duration-200 fade-in slide-in-from-top-2 sm:w-[380px]">
                                     <div className="mb-3 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
                                         Quick Presets
                                     </div>
                                     <div className="mb-4 grid grid-cols-2 gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => handlePreset('today')}
-                                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/50 px-2.5 py-2 text-left text-xs font-semibold text-foreground transition hover:bg-accent"
-                                        >
-                                            <span className="size-2 rounded-full bg-[#0EADAB]" />
-                                            Today
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handlePreset('yesterday')}
-                                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/50 px-2.5 py-2 text-left text-xs font-semibold text-foreground transition hover:bg-accent"
-                                        >
-                                            <span className="size-2 rounded-full bg-cyan-500" />
-                                            Yesterday
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handlePreset('this_week')}
-                                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/50 px-2.5 py-2 text-left text-xs font-semibold text-foreground transition hover:bg-accent"
-                                        >
-                                            <span className="size-2 rounded-full bg-pink-500" />
-                                            This Week
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handlePreset('this_month')}
-                                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/50 px-2.5 py-2 text-left text-xs font-semibold text-foreground transition hover:bg-accent"
-                                        >
-                                            <span className="size-2 rounded-full bg-amber-500" />
-                                            This Month
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handlePreset('last_month')}
-                                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/50 px-2.5 py-2 text-left text-xs font-semibold text-foreground transition hover:bg-accent"
-                                        >
-                                            <span className="size-2 rounded-full bg-blue-500" />
-                                            Previous Month
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handlePreset('last_30_days')}
-                                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/50 px-2.5 py-2 text-left text-xs font-semibold text-foreground transition hover:bg-accent"
-                                        >
-                                            <span className="size-2 rounded-full bg-emerald-500" />
-                                            Last 30 Days
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handlePreset('last_6_months')}
-                                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/50 px-2.5 py-2 text-left text-xs font-semibold text-foreground transition hover:bg-accent"
-                                        >
-                                            <span className="size-2 rounded-full bg-indigo-500" />
-                                            Last 6 Months
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handlePreset('last_year')}
-                                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/50 px-2.5 py-2 text-left text-xs font-semibold text-foreground transition hover:bg-accent"
-                                        >
-                                            <span className="size-2 rounded-full bg-orange-500" />
-                                            Last Year
-                                        </button>
+                                        {[
+                                            { id: 'today', label: 'Today', color: 'bg-[#0EADAB]' },
+                                            { id: 'yesterday', label: 'Yesterday', color: 'bg-cyan-500' },
+                                            { id: 'this_week', label: 'This Week', color: 'bg-pink-500' },
+                                            { id: 'this_month', label: 'This Month', color: 'bg-amber-500' },
+                                            { id: 'last_month', label: 'Previous Month', color: 'bg-blue-500' },
+                                            { id: 'last_30_days', label: 'Last 30 Days', color: 'bg-emerald-500' },
+                                            { id: 'last_6_months', label: 'Last 6 Months', color: 'bg-indigo-500' },
+                                            { id: 'last_year', label: 'Last Year', color: 'bg-orange-500' },
+                                        ].map((p) => (
+                                            <button
+                                                key={p.id}
+                                                type="button"
+                                                onClick={() => handlePreset(p.id)}
+                                                className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/80 bg-background/50 px-2.5 py-2 text-left text-xs font-semibold text-foreground transition hover:bg-accent"
+                                            >
+                                                <span className={`size-2 rounded-full ${p.color}`} />
+                                                {p.label}
+                                            </button>
+                                        ))}
                                     </div>
 
                                     <div className="my-3 border-t border-border/50" />
@@ -816,24 +564,8 @@ export default function Dashboard({
                     </div>
                 </div>
 
-                {/* Primary Stats Grid */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {/* Total Revenue - Commented out
-                    <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4">
-                        <StatCard
-                            title="Total Revenue"
-                            value={`$${stats[viewMode].total_revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-                            subtext={`${stats[viewMode].pending_payouts} Pending Payouts`}
-                            trend={formatTrend(stats.revenue_trend)}
-                            trendPositive={stats.revenue_trend >= 0}
-                            icon={<DollarSign className="size-4" />}
-                            accent="from-amber-500/20 to-amber-500/5"
-                            iconBg="bg-amber-500/15 text-amber-600 dark:text-amber-400"
-                            trendLabel={viewMode === 'lifetime' ? 'All Time' : stats.trend_label}
-                        />
-                    </div>
-                    */}
-
+                {/* ───────────────────── TOP STATS CARDS ───────────────────── */}
+                <div className="grid gap-4 md:grid-cols-3">
                     <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4">
                         <StatCard
                             title="Total Users"
@@ -842,8 +574,8 @@ export default function Dashboard({
                             trend={formatTrend(stats.users_trend)}
                             trendPositive={stats.users_trend >= 0}
                             icon={<Users className="size-4" />}
-                            accent="from-[#0EADAB]/20 to-[#0EADAB]/5"
-                            iconBg="bg-[#0EADAB]/15 text-[#0EADAB] dark:text-[#0EADAB]"
+                            accent="from-[#0EADAB]/15 to-transparent"
+                            iconBg="bg-[#0EADAB]/15 text-[#0EADAB]"
                             trendLabel={viewMode === 'lifetime' ? 'All Time' : stats.trend_label}
                         />
                     </div>
@@ -856,7 +588,7 @@ export default function Dashboard({
                             trend={formatTrend(stats.active_users_trend || stats.users_trend)}
                             trendPositive={(stats.active_users_trend || stats.users_trend) >= 0}
                             icon={<UserCheck className="size-4" />}
-                            accent="from-emerald-500/20 to-emerald-500/5"
+                            accent="from-emerald-500/15 to-transparent"
                             iconBg="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
                             trendLabel={viewMode === 'lifetime' ? 'All Time' : stats.trend_label}
                         />
@@ -870,120 +602,279 @@ export default function Dashboard({
                             trend="+0%"
                             trendPositive={true}
                             icon={<Shield className="size-4" />}
-                            accent="from-amber-500/20 to-amber-500/5"
+                            accent="from-amber-500/15 to-transparent"
                             iconBg="bg-amber-500/15 text-amber-600 dark:text-amber-400"
                             trendLabel="System Access"
                         />
                     </div>
-
-                    {/* Businesses - Commented out
-                    <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4" style={{ animationDelay: '160ms' }}>
-                        <StatCard
-                            title="Businesses"
-                            value={stats[viewMode].total_businesses.toLocaleString()}
-                            subtext={`${stats[viewMode].active_businesses} Active Attractions`}
-                            trend={formatTrend(stats.businesses_trend)}
-                            trendPositive={stats.businesses_trend >= 0}
-                            icon={<Building2 className="size-4" />}
-                            accent="from-cyan-500/20 to-cyan-500/5"
-                            iconBg="bg-cyan-500/15 text-cyan-600 dark:text-cyan-400"
-                            trendLabel={viewMode === 'lifetime' ? 'All Time' : stats.trend_label}
-                        />
-                    </div>
-                    */}
-
-                    {/* Passes - Commented out
-                    <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4" style={{ animationDelay: '240ms' }}>
-                        <StatCard
-                            title="Passes"
-                            value={stats[viewMode].total_plans.toLocaleString()}
-                            subtext={`${stats[viewMode].active_plans} Active Membership Passes`}
-                            trend="+100%"
-                            trendPositive={true}
-                            icon={<Layers className="size-4" />}
-                            accent="from-emerald-500/20 to-emerald-500/5"
-                            iconBg="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                            trendLabel="Active passes"
-                        />
-                    </div>
-                    */}
-
-                    {/* Redemptions / Visits - Commented out
-                    <div className="animate-in duration-500 fill-mode-both fade-in slide-in-from-bottom-4" style={{ animationDelay: '320ms' }}>
-                        <StatCard
-                            title="Redemptions / Visits"
-                            value={stats[viewMode].total_redemptions.toLocaleString()}
-                            subtext={`${stats[viewMode].pending_redemptions} Pending Approvals`}
-                            trend={formatTrend(stats.redemptions_trend)}
-                            trendPositive={stats.redemptions_trend >= 0}
-                            icon={<Gift className="size-4" />}
-                            accent="from-pink-500/20 to-pink-500/5"
-                            iconBg="bg-pink-500/15 text-pink-600 dark:text-pink-400"
-                            trendLabel={viewMode === 'lifetime' ? 'All Time' : stats.trend_label}
-                        />
-                    </div>
-                    */}
                 </div>
 
-                {/* Secondary section: User Roles & Recent Signups */}
-                <div className="grid gap-6">
-                    {/* Activity & Growth Overview Chart - Commented out for now
-                    <div className="animate-in overflow-hidden rounded-xl border border-sidebar-border bg-card p-6 shadow-sm duration-700 fill-mode-both fade-in slide-in-from-left-6 lg:col-span-4">
-                        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                                <h3 className="text-lg font-semibold">
-                                    Activity & Growth Overview
-                                </h3>
-                                <p className="text-xs text-muted-foreground">
-                                    Comparison of subscribers, point redemptions, and registered businesses
-                                </p>
+                {/* ───────────────────── ANIMATED MOCK CHARTS SECTION ───────────────────── */}
+                <div className="grid gap-6 lg:grid-cols-12">
+                    {/* 📊 Main Growth & Activity Chart (8 cols) */}
+                    <div className="animate-in rounded-2xl border border-sidebar-border bg-card p-6 shadow-2xs duration-700 fill-mode-both fade-in slide-in-from-left-4 lg:col-span-8 flex flex-col justify-between">
+                        <div>
+                            <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex size-7 items-center justify-center rounded-lg bg-[#0EADAB]/15 text-[#0EADAB]">
+                                            <Activity className="size-4" />
+                                        </div>
+                                        <h3 className="text-base font-bold text-foreground">
+                                            User Growth & Activity Analytics
+                                        </h3>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Real-time interactive trend of total users, active sessions, and new registrations
+                                    </p>
+                                </div>
+
+                                {/* Timeframe Selector */}
+                                <div className="inline-flex rounded-xl border border-border/80 bg-muted/40 p-1">
+                                    {(['monthly', 'weekly', 'daily'] as const).map((tf) => (
+                                        <button
+                                            key={tf}
+                                            type="button"
+                                            onClick={() => setTimeframe(tf)}
+                                            className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize transition-all cursor-pointer ${
+                                                timeframe === tf
+                                                    ? 'bg-card text-foreground shadow-2xs border border-border/60'
+                                                    : 'text-muted-foreground hover:text-foreground'
+                                            }`}
+                                        >
+                                            {tf}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="flex flex-wrap gap-3 text-xs">
-                                <span className="flex items-center gap-1.5 rounded-full bg-violet-500/10 px-2.5 py-1 font-medium text-violet-700 dark:text-violet-300">
-                                    <span className="size-2 rounded-sm bg-violet-500" />
-                                    Subscribers
-                                </span>
-                                <span className="flex items-center gap-1.5 rounded-full bg-pink-500/10 px-2.5 py-1 font-medium text-pink-700 dark:text-pink-300">
-                                    <span className="size-2 rounded-sm bg-pink-500" />
-                                    Redemptions
-                                </span>
-                                <span className="flex items-center gap-1.5 rounded-full bg-cyan-500/10 px-2.5 py-1 font-medium text-cyan-700 dark:text-cyan-300">
-                                    <span className="size-2 rounded-sm bg-cyan-500" />
-                                    Businesses
-                                </span>
+
+                            {/* Metric Filter Badges */}
+                            <div className="flex flex-wrap items-center gap-2 mb-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveMetric('all')}
+                                    className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer border ${
+                                        activeMetric === 'all'
+                                            ? 'bg-foreground text-background border-foreground'
+                                            : 'bg-card text-muted-foreground border-border hover:bg-accent'
+                                    }`}
+                                >
+                                    <span>All Metrics</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveMetric('users')}
+                                    className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer border ${
+                                        activeMetric === 'users'
+                                            ? 'bg-[#0EADAB] text-white border-[#0EADAB]'
+                                            : 'bg-[#0EADAB]/10 text-[#0EADAB] border-[#0EADAB]/20 hover:bg-[#0EADAB]/20'
+                                    }`}
+                                >
+                                    <span className="size-2 rounded-full bg-[#0EADAB]" />
+                                    <span>Total Users</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveMetric('signups')}
+                                    className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer border ${
+                                        activeMetric === 'signups'
+                                            ? 'bg-sky-500 text-white border-sky-500'
+                                            : 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20 hover:bg-sky-500/20'
+                                    }`}
+                                >
+                                    <span className="size-2 rounded-full bg-sky-500" />
+                                    <span>New Signups</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveMetric('security')}
+                                    className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer border ${
+                                        activeMetric === 'security'
+                                            ? 'bg-purple-500 text-white border-purple-500'
+                                            : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 hover:bg-purple-500/20'
+                                    }`}
+                                >
+                                    <span className="size-2 rounded-full bg-purple-500" />
+                                    <span>Auth & Security</span>
+                                </button>
                             </div>
                         </div>
-                        <div className="relative h-[320px] w-full rounded-lg bg-gradient-to-b from-muted/40 to-transparent p-2 pb-0 dark:from-muted/25 dark:to-transparent">
-                            <SystemActivityChart data={chartData} />
+
+                        {/* Chart Render Area */}
+                        <div className="relative h-[290px] w-full pt-2">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={activeChartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="tealGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#0EADAB" stopOpacity={0.35} />
+                                            <stop offset="100%" stopColor="#0EADAB" stopOpacity={0.0} />
+                                        </linearGradient>
+                                        <linearGradient id="skyGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#0284c7" stopOpacity={0.3} />
+                                            <stop offset="100%" stopColor="#0284c7" stopOpacity={0.0} />
+                                        </linearGradient>
+                                        <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                                            <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.0} />
+                                        </linearGradient>
+                                    </defs>
+
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.grid} />
+                                    <XAxis
+                                        dataKey="period"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: theme.tick, fontSize: 11, fontWeight: 500 }}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: theme.tick, fontSize: 11 }}
+                                        tickFormatter={(val) => (val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val)}
+                                    />
+                                    <Tooltip content={<CustomTooltip />} />
+
+                                    {(activeMetric === 'all' || activeMetric === 'users') && (
+                                        <Area
+                                            type="monotone"
+                                            dataKey="totalUsers"
+                                            name="Total Users"
+                                            stroke="#0EADAB"
+                                            strokeWidth={3}
+                                            fill="url(#tealGradient)"
+                                            dot={{ r: 4, fill: '#0EADAB', stroke: theme.dotStroke, strokeWidth: 2 }}
+                                            activeDot={{ r: 7, fill: '#0EADAB', stroke: theme.dotStroke, strokeWidth: 2 }}
+                                            {...ANIMATION_CONFIG}
+                                        />
+                                    )}
+
+                                    {(activeMetric === 'all' || activeMetric === 'signups') && (
+                                        <Area
+                                            type="monotone"
+                                            dataKey="newSignups"
+                                            name="New Signups"
+                                            stroke="#0284c7"
+                                            strokeWidth={2.5}
+                                            fill="url(#skyGradient)"
+                                            dot={{ r: 3.5, fill: '#0284c7', stroke: theme.dotStroke, strokeWidth: 2 }}
+                                            activeDot={{ r: 6, fill: '#0284c7', stroke: theme.dotStroke, strokeWidth: 2 }}
+                                            {...ANIMATION_CONFIG}
+                                        />
+                                    )}
+
+                                    {(activeMetric === 'all' || activeMetric === 'security') && (
+                                        <Area
+                                            type="monotone"
+                                            dataKey="securityEvents"
+                                            name="Security Events"
+                                            stroke="#8b5cf6"
+                                            strokeWidth={2.5}
+                                            fill="url(#purpleGradient)"
+                                            dot={{ r: 3.5, fill: '#8b5cf6', stroke: theme.dotStroke, strokeWidth: 2 }}
+                                            activeDot={{ r: 6, fill: '#8b5cf6', stroke: theme.dotStroke, strokeWidth: 2 }}
+                                            {...ANIMATION_CONFIG}
+                                        />
+                                    )}
+                                </AreaChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
-                    */}
 
-                    <div className="animate-in rounded-xl border border-sidebar-border bg-card p-6 shadow-sm duration-700 fill-mode-both fade-in slide-in-from-bottom-4">
+                    {/* 🍩 User Roles & Platform Breakdown Donut Chart (4 cols) */}
+                    <div className="animate-in rounded-2xl border border-sidebar-border bg-card p-6 shadow-2xs duration-700 fill-mode-both fade-in slide-in-from-right-4 lg:col-span-4 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="flex size-7 items-center justify-center rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400">
+                                        <PieChartIcon className="size-4" />
+                                    </div>
+                                    <h3 className="text-base font-bold text-foreground">Role Distribution</h3>
+                                </div>
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#0EADAB]/10 px-2 py-0.5 text-[10px] font-bold text-[#0EADAB]">
+                                    <Sparkles className="size-3" /> Live Ratio
+                                </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Breakdown of active roles across all registered accounts
+                            </p>
+                        </div>
+
+                        {/* Donut Chart Container */}
+                        <div className="relative h-[200px] w-full my-2 flex items-center justify-center">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={ROLE_DONUT_DATA}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={55}
+                                        outerRadius={80}
+                                        paddingAngle={4}
+                                        dataKey="value"
+                                        {...ANIMATION_CONFIG}
+                                    >
+                                        {ROLE_DONUT_DATA.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} stroke={theme.dotStroke} strokeWidth={2} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            <div className="absolute flex flex-col items-center justify-center pointer-events-none">
+                                <span className="text-xl font-extrabold text-foreground tracking-tight">
+                                    {totalDonutUsers.toLocaleString()}
+                                </span>
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                                    Accounts
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Donut Legend Items */}
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/60 text-xs">
+                            {ROLE_DONUT_DATA.map((item) => (
+                                <div key={item.name} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/20">
+                                    <div className="flex items-center gap-1.5 truncate">
+                                        <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                                        <span className="truncate text-muted-foreground text-[11px] font-medium">{item.name}</span>
+                                    </div>
+                                    <span className="font-bold text-foreground text-[11px] ml-1">
+                                        {Math.round((item.value / totalDonutUsers) * 100)}%
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* ───────────────────── USER ROLES & RECENT REGISTRATIONS ───────────────────── */}
+                <div className="grid gap-6 lg:grid-cols-12">
+                    {/* User accounts breakdown & table (8 cols) */}
+                    <div className="animate-in rounded-2xl border border-sidebar-border bg-card p-6 shadow-2xs duration-700 fill-mode-both fade-in slide-in-from-bottom-4 lg:col-span-8">
                         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                             <div>
-                                <h3 className="text-lg font-semibold">
+                                <h3 className="text-base font-bold text-foreground">
                                     User Roles & Recent Registrations
                                 </h3>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-muted-foreground mt-0.5">
                                     User accounts breakdown and recent signup activity
                                 </p>
                             </div>
                         </div>
                         
                         {/* Role breakdown chips */}
-                        <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div className="rounded-lg border border-border/50 bg-background/50 p-3 text-center">
+                        <div className="mb-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-center">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Admins</p>
-                                <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{stats[viewMode].total_admins}</p>
+                                <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">{stats[viewMode].total_admins}</p>
                             </div>
-                            <div className="rounded-lg border border-border/50 bg-background/50 p-3 text-center">
+                            <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-center">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Partners</p>
-                                <p className="text-xl font-bold text-[#0EADAB]">{stats[viewMode].total_partners}</p>
+                                <p className="text-xl font-bold text-[#0EADAB] mt-0.5">{stats[viewMode].total_partners}</p>
                             </div>
-                            <div className="rounded-lg border border-border/50 bg-background/50 p-3 text-center">
+                            <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-center">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Users</p>
-                                <p className="text-xl font-bold text-[#0EADAB]">{stats[viewMode].total_customers}</p>
+                                <p className="text-xl font-bold text-purple-600 dark:text-purple-400 mt-0.5">{stats[viewMode].total_customers}</p>
                             </div>
                         </div>
 
@@ -1013,11 +904,11 @@ export default function Dashboard({
                                     return (
                                         <div
                                             key={u.id}
-                                            className="group relative -mx-2 flex animate-in items-center justify-between rounded-lg border-b border-border/40 px-2 py-2.5 transition-all duration-300 fill-mode-both fade-in slide-in-from-right-4 last:border-0 hover:bg-muted/30"
+                                            className="group relative -mx-2 flex animate-in items-center justify-between rounded-xl border-b border-border/40 px-3 py-2.5 transition-all duration-200 fill-mode-both fade-in slide-in-from-right-4 last:border-0 hover:bg-muted/30"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div
-                                                    className="flex size-9 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm ring-1 ring-border"
+                                                    className="flex size-9 items-center justify-center rounded-full text-xs font-bold text-white shadow-xs ring-1 ring-border"
                                                     style={{
                                                         background: avatarGrad,
                                                     }}
@@ -1050,6 +941,60 @@ export default function Dashboard({
                                 })}
                             </div>
                         )}
+                    </div>
+
+                    {/* System Security & Health Quick Status Widget (4 cols) */}
+                    <div className="animate-in rounded-2xl border border-sidebar-border bg-card p-6 shadow-2xs duration-700 fill-mode-both fade-in slide-in-from-bottom-4 lg:col-span-4 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                                    <ShieldAlert className="size-4" />
+                                </div>
+                                <h3 className="text-base font-bold text-foreground">Security & System Health</h3>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Overview of active protection layers and system services
+                            </p>
+                        </div>
+
+                        <div className="space-y-2.5 my-4">
+                            <div className="flex items-center justify-between p-2.5 rounded-xl border border-sidebar-border bg-muted/20 text-xs">
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="size-4 text-emerald-500" />
+                                    <span className="font-medium text-foreground">System Status</span>
+                                </div>
+                                <span className="font-semibold text-emerald-600 dark:text-emerald-400">99.9% Online</span>
+                            </div>
+
+                            <div className="flex items-center justify-between p-2.5 rounded-xl border border-sidebar-border bg-muted/20 text-xs">
+                                <div className="flex items-center gap-2">
+                                    <Lock className="size-4 text-[#0EADAB]" />
+                                    <span className="font-medium text-foreground">Two-Factor MFA</span>
+                                </div>
+                                <span className="font-semibold text-[#0EADAB]">Protected</span>
+                            </div>
+
+                            <div className="flex items-center justify-between p-2.5 rounded-xl border border-sidebar-border bg-muted/20 text-xs">
+                                <div className="flex items-center gap-2">
+                                    <Shield className="size-4 text-amber-500" />
+                                    <span className="font-medium text-foreground">Rate Limiting / Lockout</span>
+                                </div>
+                                <span className="font-semibold text-amber-600 dark:text-amber-400">Active</span>
+                            </div>
+
+                            <div className="flex items-center justify-between p-2.5 rounded-xl border border-sidebar-border bg-muted/20 text-xs">
+                                <div className="flex items-center gap-2">
+                                    <Zap className="size-4 text-purple-500" />
+                                    <span className="font-medium text-foreground">Email Sanitizer</span>
+                                </div>
+                                <span className="font-semibold text-purple-600 dark:text-purple-400">Guarded</span>
+                            </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Platform Engine</span>
+                            <span className="font-semibold text-foreground">Laravel + Inertia React</span>
+                        </div>
                     </div>
                 </div>
             </div>
