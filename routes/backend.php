@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Web\Company\CompanyProfileController;
 use App\Http\Controllers\Web\Dynamic\DynamicPageController;
 use App\Http\Controllers\Web\Faq\FaqController;
+use App\Http\Controllers\Web\Plan\PlanController;
 use App\Http\Controllers\Web\User\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,3 +31,19 @@ Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
 Route::post('/faq/store', [FaqController::class, 'store'])->name('faq.store');
 Route::patch('/faq/update/{id}', [FaqController::class, 'update'])->name('faq.update');
 Route::delete('/faq/destroy/{id}', [FaqController::class, 'destroy'])->name('faq.destroy');
+
+// --- Plans ---
+Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
+Route::get('/plan', [PlanController::class, 'index'])->name('plan.index');
+Route::post('/plan/store', [PlanController::class, 'store'])->name('plan.store');
+Route::patch('/plan/update/{id}', [PlanController::class, 'update'])->name('plan.update');
+Route::post('/plan/toggle/{id}', [PlanController::class, 'toggleStatus'])->name('plan.toggle');
+Route::delete('/plan/destroy/{id}', [PlanController::class, 'destroy'])->name('plan.destroy');
+
+// --- Company Profiles ---
+Route::get('/companies', [CompanyProfileController::class, 'index'])->name('companies.index');
+Route::get('/company', [CompanyProfileController::class, 'index'])->name('company.index');
+Route::post('/company/store', [CompanyProfileController::class, 'store'])->name('company.store');
+Route::patch('/company/update/{id}', [CompanyProfileController::class, 'update'])->name('company.update');
+Route::delete('/company/destroy/{id}', [CompanyProfileController::class, 'destroy'])->name('company.destroy');
+

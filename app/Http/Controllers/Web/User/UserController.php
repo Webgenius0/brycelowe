@@ -48,9 +48,10 @@ class UserController extends Controller
         $analytics = [
             'total_users' => User::count(),
             'active_users' => User::where('status', 'Active')->count(),
-            'total_admins' => User::where('role', 'Admin')->count(),
-            'total_partners' => User::where('role', 'Partner')->count(),
-            'total_customers' => User::where('role', 'User')->count(),
+            'total_superadmins' => User::whereIn('role', ['SUPERADMIN', 'Admin'])->count(),
+            'total_managers' => User::where('role', 'MANAGER')->count(),
+            'total_sales' => User::where('role', 'SELS')->count(),
+            'total_auditors' => User::where('role', 'AUDIOTOR')->count(),
             'new_this_month' => User::where('created_at', '>=', now()->startOfMonth())->count(),
         ];
 
@@ -73,7 +74,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'phone' => 'nullable|string|max:20',
-            'role' => 'nullable|in:User,Admin,Partner',
+            'role' => 'nullable|in:SUPERADMIN,SELS,MANAGER,AUDIOTOR,Admin,User,Partner',
             'status' => 'nullable|in:Active,Inactive,Banned',
         ]);
 
@@ -82,7 +83,8 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => bcrypt($request->password),
             'phone' => $request->phone,
-            'role' => $request->role ?? 'User',
+            'role' => $request->role ?? 'SUPERADMIN',
+            'external_user_role' => in_array($request->role, ['SUPERADMIN', 'SELS', 'MANAGER', 'AUDIOTOR']) ? $request->role : null,
             'status' => $request->status ?? 'Active',
         ]);
 
@@ -100,11 +102,14 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
-            'role' => 'nullable|in:User,Admin,Partner',
+            'role' => 'nullable|in:SUPERADMIN,SELS,MANAGER,AUDIOTOR,Admin,User,Partner',
             'status' => 'nullable|in:Active,Inactive,Banned',
         ]);
 
         $data = $request->only(['name', 'email', 'phone', 'role', 'status']);
+        if ($request->filled('role') && in_array($request->role, ['SUPERADMIN', 'SELS', 'MANAGER', 'AUDIOTOR'])) {
+            $data['external_user_role'] = $request->role;
+        }
 
         if ($request->filled('password')) {
             $data['password'] = bcrypt($request->password);

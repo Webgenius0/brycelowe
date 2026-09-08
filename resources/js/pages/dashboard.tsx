@@ -978,23 +978,29 @@ export default function Dashboard({
                             </div>
 
                             {/* Role breakdown chips */}
-                            <div className="mb-4 grid grid-cols-3 gap-2">
+                            <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 <div className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-center">
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Admins</p>
-                                    <p className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5">
-                                        {stats[viewMode].total_admins}
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Superadmin</p>
+                                    <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
+                                        {(stats[viewMode] as any).total_superadmins ?? stats[viewMode].total_admins ?? 0}
                                     </p>
                                 </div>
                                 <div className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-center">
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Partners</p>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Manager</p>
+                                    <p className="text-lg font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+                                        {(stats[viewMode] as any).total_managers ?? 0}
+                                    </p>
+                                </div>
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-center">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Sales (SELS)</p>
                                     <p className="text-lg font-bold text-[#0EADAB] mt-0.5">
-                                        {stats[viewMode].total_partners}
+                                        {(stats[viewMode] as any).total_sales ?? 0}
                                     </p>
                                 </div>
                                 <div className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-center">
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Users</p>
-                                    <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-0.5">
-                                        {stats[viewMode].total_customers}
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Auditor</p>
+                                    <p className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+                                        {(stats[viewMode] as any).total_auditors ?? 0}
                                     </p>
                                 </div>
                             </div>
@@ -1006,21 +1012,28 @@ export default function Dashboard({
                             ) : (
                                 <div className="space-y-1">
                                     {recentUsers.slice(0, 5).map((u) => {
-                                        const roleLower = u.role?.toLowerCase();
-                                        const isAdmin = roleLower === 'admin';
-                                        const isPartner = roleLower === 'partner';
+                                        const role = (u.role || '').toUpperCase();
+                                        const isSuper = role === 'SUPERADMIN' || role === 'ADMIN';
+                                        const isManager = role === 'MANAGER';
+                                        const isSales = role === 'SELS';
+                                        const isAuditor = role === 'AUDIOTOR';
 
-                                        const badgeClass = isAdmin
-                                            ? 'bg-amber-500/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/30'
-                                            : isPartner
-                                              ? 'bg-cyan-500/10 text-cyan-600 ring-cyan-600/20 dark:bg-cyan-400/10 dark:text-cyan-400 dark:ring-cyan-400/30'
-                                              : 'bg-violet-500/10 text-violet-600 ring-violet-600/20 dark:bg-violet-400/10 dark:text-violet-400 dark:ring-violet-400/30';
+                                        let badgeClass = 'bg-violet-500/10 text-violet-600 ring-violet-600/20 dark:bg-violet-400/10 dark:text-violet-400 dark:ring-violet-400/30';
+                                        let avatarGrad = 'linear-gradient(135deg, #6366f1, #4f46e5)';
 
-                                        const avatarGrad = isAdmin
-                                            ? 'linear-gradient(135deg, #f59e0b, #d97706)'
-                                            : isPartner
-                                              ? 'linear-gradient(135deg, #06b6d4, #0284c7)'
-                                              : 'linear-gradient(135deg, #8b5cf6, #6d28d9)';
+                                        if (isSuper) {
+                                            badgeClass = 'bg-indigo-500/10 text-indigo-600 ring-indigo-600/20 dark:bg-indigo-400/10 dark:text-indigo-400 dark:ring-indigo-400/30';
+                                            avatarGrad = 'linear-gradient(135deg, #6366f1, #4338ca)';
+                                        } else if (isManager) {
+                                            badgeClass = 'bg-blue-500/10 text-blue-600 ring-blue-600/20 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30';
+                                            avatarGrad = 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
+                                        } else if (isSales) {
+                                            badgeClass = 'bg-teal-500/10 text-teal-600 ring-teal-600/20 dark:bg-teal-400/10 dark:text-teal-400 dark:ring-teal-400/30';
+                                            avatarGrad = 'linear-gradient(135deg, #0EADAB, #0d9488)';
+                                        } else if (isAuditor) {
+                                            badgeClass = 'bg-amber-500/10 text-amber-600 ring-amber-600/20 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/30';
+                                            avatarGrad = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                                        }
 
                                         return (
                                             <div
@@ -1050,7 +1063,7 @@ export default function Dashboard({
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${badgeClass}`}>
+                                                    <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${badgeClass}`}>
                                                         {u.role}
                                                     </span>
                                                     <p className="mt-0.5 text-[10px] text-muted-foreground">

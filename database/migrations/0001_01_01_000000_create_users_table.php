@@ -35,7 +35,8 @@ return new class extends Migration
             $table->enum('user_type', ['INTERNAL', 'EXTERNAL'])->default('EXTERNAL');
             $table->dateTime('last_login')->nullable();
             $table->dateTime('last_login_at')->nullable();
-            $table->enum('role', ['User', 'Admin', 'Partner'])->default('User');
+            $table->enum('role', ['SUPERADMIN', 'SELS', 'MANAGER', 'AUDIOTOR', 'USER'])->default('USER');
+            $table->enum('external_user_role', ['SUPERADMIN', 'SELS', 'MANAGER', 'AUDIOTOR'])->nullable();
             $table->enum('status', ['Active', 'Inactive', 'Banned'])->default('Active');
             $table->string('stripe_connect_id')->nullable();
             $table->boolean('stripe_connect_active')->default(false);

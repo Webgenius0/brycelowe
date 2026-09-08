@@ -31,6 +31,7 @@ use Laravel\Sanctum\HasApiTokens;
     'address',
     'status',
     'role',
+    'external_user_role',
     'terms',
     'email_2fa_enabled',
     'is_2fa_enabled',
@@ -62,7 +63,7 @@ class User extends Authenticatable
                 $user->phone_number = $user->phone;
             }
             if (empty($user->user_type)) {
-                $user->user_type = ($user->role === 'Admin' || $user->is_superuser) ? 'INTERNAL' : 'EXTERNAL';
+                $user->user_type = ($user->role === 'Admin' || $user->role === 'SUPERADMIN' || $user->is_superuser) ? 'INTERNAL' : 'EXTERNAL';
             }
         });
 
@@ -89,6 +90,12 @@ class User extends Authenticatable
             }
             if (isset($user->last_login) && empty($user->last_login_at)) {
                 $user->last_login_at = $user->last_login;
+            }
+            if (!empty($user->role) && in_array($user->role, ['SUPERADMIN', 'SELS', 'MANAGER', 'AUDIOTOR']) && empty($user->external_user_role)) {
+                $user->external_user_role = $user->role;
+            }
+            if (!empty($user->external_user_role) && empty($user->role)) {
+                $user->role = $user->external_user_role;
             }
         });
     }

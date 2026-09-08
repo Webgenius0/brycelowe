@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, LayoutGrid, Mail, Menu, Search } from 'lucide-react';
+import { BookOpen, Building2, CreditCard, LayoutGrid, Mail, Menu, Search, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -46,19 +46,28 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Users',
+        href: '/user',
+        icon: Users,
+    },
+    {
+        title: 'Companies',
+        href: '/company',
+        icon: Building2,
+    },
+    {
+        title: 'Plans',
+        href: '/plan',
+        icon: CreditCard,
+    },
+    {
         title: 'Newsletter',
         href: '/newsletter',
         icon: Mail,
     },
 ];
 
-const rightNavItems: NavItem[] = [
-    {
-        title: 'Documentation',
-        href: '/settings/docs',
-        icon: BookOpen,
-    },
-];
+const rightNavItems: NavItem[] = [];
 
 const activeItemStyles =
     'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';

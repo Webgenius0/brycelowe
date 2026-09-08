@@ -2,6 +2,8 @@ import { Link, router } from '@inertiajs/react';
 
 import {
     BookOpen,
+    Building2,
+    CreditCard,
     FileText,
     HelpCircle,
     LayoutGrid,
@@ -32,6 +34,7 @@ import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
+    SidebarGroup,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -53,6 +56,16 @@ const mainNavItems: NavItem[] = [
         icon: Users,
     },
     {
+        title: 'Companies',
+        href: '/company',
+        icon: Building2,
+    },
+    {
+        title: 'Plans',
+        href: '/plan',
+        icon: CreditCard,
+    },
+    {
         title: 'Newsletter',
         href: '/newsletter',
         icon: Mail,
@@ -69,13 +82,7 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Documentation',
-        href: '/settings/docs',
-        icon: BookOpen,
-    },
-];
+const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     const [openLogout, setOpenLogout] = useState(false);
@@ -94,9 +101,9 @@ export function AppSidebar() {
                             <SidebarMenuButton
                                 size="lg"
                                 asChild
-                                className="hover:bg-transparent"
+                                className="hover:bg-transparent justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                             >
-                                <Link href={dashboard()} prefetch>
+                                <Link href={dashboard()} prefetch className="flex items-center group-data-[collapsible=icon]:justify-center">
                                     <AppLogo />
                                 </Link>
                             </SidebarMenuButton>
@@ -107,17 +114,26 @@ export function AppSidebar() {
                 <SidebarContent>
                     <NavMain items={mainNavItems} />
 
-                    <button
-                        onClick={() => setOpenLogout(true)}
-                        className="mt-3 flex w-full cursor-pointer items-center gap-2 rounded-md px-5 py-2 text-sm transition hover:bg-red-500/15"
-                    >
-                        <LogOut className="size-4" />
-                        Logout
-                    </button>
+                    <SidebarGroup className="px-2 py-0 mt-2">
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    tooltip={{ children: 'Logout' }}
+                                    onClick={() => setOpenLogout(true)}
+                                    className="cursor-pointer transition-all duration-200 ease-in-out text-red-600 hover:bg-red-500/15 hover:text-red-700 dark:text-red-400"
+                                >
+                                    <LogOut className="size-4 shrink-0" />
+                                    <span>Logout</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroup>
                 </SidebarContent>
 
                 <SidebarFooter>
-                    <NavFooter items={footerNavItems} className="mt-auto" />
+                    {footerNavItems.length > 0 && (
+                        <NavFooter items={footerNavItems} className="mt-auto" />
+                    )}
                     <NavUser />
                 </SidebarFooter>
             </Sidebar>

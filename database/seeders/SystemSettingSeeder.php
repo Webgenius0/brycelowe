@@ -16,7 +16,6 @@ class SystemSettingSeeder extends Seeder
             ['id' => 1],
             [
                 'site_title' => 'Bryce Lowe',
-                'site_name' => 'Bryce Lowe',
                 'logo' => null,
                 'favicon' => null,
                 'copyright_text' => 'Copyright © 2026. All Rights Reserved. Bryce Lowe.',

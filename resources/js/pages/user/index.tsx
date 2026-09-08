@@ -24,9 +24,10 @@ type Props = {
     analytics: {
         total_users: number;
         active_users: number;
-        total_admins: number;
-        total_partners: number;
-        total_customers: number;
+        total_superadmins?: number;
+        total_managers?: number;
+        total_sales?: number;
+        total_auditors?: number;
         new_this_month: number;
     };
     filters: {
@@ -92,7 +93,7 @@ function CreateUserModal({
         email: '',
         password: '',
         phone: '',
-        role: 'User',
+        role: 'SUPERADMIN',
         status: 'Active',
     });
 
@@ -192,10 +193,10 @@ function CreateUserModal({
                                 }
                                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                             >
-                                <option value="">Select Role</option>
-                                <option value="User">User</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Partner">Partner</option>
+                                <option value="SUPERADMIN">SUPERADMIN</option>
+                                <option value="SELS">SELS (Sales)</option>
+                                <option value="MANAGER">MANAGER</option>
+                                <option value="AUDIOTOR">AUDIOTOR</option>
                             </select>
                         </div>
                         <div className="space-y-2">
@@ -361,10 +362,10 @@ function EditUserModal({
                                 }
                                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                             >
-                                <option value="">Select Role</option>
-                                <option value="User">User</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Partner">Partner</option>
+                                <option value="SUPERADMIN">SUPERADMIN</option>
+                                <option value="SELS">SELS (Sales)</option>
+                                <option value="MANAGER">MANAGER</option>
+                                <option value="AUDIOTOR">AUDIOTOR</option>
                             </select>
                         </div>
                         <div className="space-y-2">
@@ -513,7 +514,7 @@ function UserDetailsModal({
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 rounded-xl border border-border bg-muted/20 text-sm mt-2">
                     <div>
                         <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Role</span>
-                        <span className="font-medium text-foreground mt-0.5 block">{user.role ?? 'User'}</span>
+                        <span className="font-medium text-foreground mt-0.5 block">{user.role ?? 'SUPERADMIN'}</span>
                     </div>
                     <div>
                         <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Status</span>
@@ -598,7 +599,27 @@ export default function UsersPage({ users, analytics, filters }: Props) {
         },
         { key: 'name', title: 'Name' },
         { key: 'email', title: 'Email' },
-        { key: 'role', title: 'Role' },
+        {
+            key: 'role',
+            title: 'Role',
+            render: (row: User) => {
+                const role = row.role || 'SUPERADMIN';
+                let badgeClass = 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400';
+                if (role === 'MANAGER') {
+                    badgeClass = 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
+                } else if (role === 'SELS') {
+                    badgeClass = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+                } else if (role === 'AUDIOTOR') {
+                    badgeClass = 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+                }
+
+                return (
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${badgeClass}`}>
+                        {role}
+                    </span>
+                );
+            },
+        },
         {
             key: 'phone',
             title: 'Phone',
@@ -716,7 +737,7 @@ export default function UsersPage({ users, analytics, filters }: Props) {
                 </div>
 
                 {/* Analytics Grid */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
                     <StatCard
                         title="Total Users"
                         value={analytics.total_users}
@@ -734,28 +755,36 @@ export default function UsersPage({ users, analytics, filters }: Props) {
                         accent="bg-emerald-500/10"
                     />
                     <StatCard
-                        title="Admins"
-                        value={analytics.total_admins}
+                        title="Superadmins"
+                        value={analytics.total_superadmins ?? 0}
                         icon={
-                            <Shield className="size-5 text-amber-600 dark:text-amber-400" />
-                        }
-                        accent="bg-amber-500/10"
-                    />
-                    <StatCard
-                        title="Partners"
-                        value={analytics.total_partners}
-                        icon={
-                            <Building2 className="size-5 text-cyan-600 dark:text-cyan-400" />
-                        }
-                        accent="bg-cyan-500/10"
-                    />
-                    <StatCard
-                        title="New This Month"
-                        value={analytics.new_this_month}
-                        icon={
-                            <UserPlus className="size-5 text-indigo-600 dark:text-indigo-400" />
+                            <Shield className="size-5 text-indigo-600 dark:text-indigo-400" />
                         }
                         accent="bg-indigo-500/10"
+                    />
+                    <StatCard
+                        title="Managers"
+                        value={analytics.total_managers ?? 0}
+                        icon={
+                            <Building2 className="size-5 text-blue-600 dark:text-blue-400" />
+                        }
+                        accent="bg-blue-500/10"
+                    />
+                    <StatCard
+                        title="Sales (SELS)"
+                        value={analytics.total_sales ?? 0}
+                        icon={
+                            <UserPlus className="size-5 text-teal-600 dark:text-teal-400" />
+                        }
+                        accent="bg-teal-500/10"
+                    />
+                    <StatCard
+                        title="Auditors"
+                        value={analytics.total_auditors ?? 0}
+                        icon={
+                            <Eye className="size-5 text-amber-600 dark:text-amber-400" />
+                        }
+                        accent="bg-amber-500/10"
                     />
                 </div>
 
@@ -769,12 +798,13 @@ export default function UsersPage({ users, analytics, filters }: Props) {
                     <select
                         value={filters.role || ''}
                         onChange={handleRoleChange}
-                        className="h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring cursor-pointer min-w-[120px]"
+                        className="h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring cursor-pointer min-w-[150px]"
                     >
                         <option value="">All Roles</option>
-                        <option value="User">User</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Partner">Partner</option>
+                        <option value="SUPERADMIN">SUPERADMIN</option>
+                        <option value="SELS">SELS (Sales)</option>
+                        <option value="MANAGER">MANAGER</option>
+                        <option value="AUDIOTOR">AUDIOTOR</option>
                     </select>
                 </DataTable>
             </div>
