@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('faqs', function (Blueprint $table) {
             $table->id();
+            $table->unsignedInteger('serial')->default(0);
             $table->text('question');
             $table->text('answer');
             $table->enum('status', ['Active', 'Inactive'])->default('Active');

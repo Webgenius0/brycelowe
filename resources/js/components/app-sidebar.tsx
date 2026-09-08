@@ -2,23 +2,11 @@ import { Link, router } from '@inertiajs/react';
 
 import {
     BookOpen,
-    Building2,
-    ClipboardList,
-    Contact,
-    CreditCard,
     FileText,
-    FolderTree,
-    Gift,
     HelpCircle,
-    History,
-    Layers,
     LayoutGrid,
     LogOut,
-    Mail,
-    Ticket,
     Users,
-    UserCheck,
-    Wallet,
 } from 'lucide-react';
 
 import { useState } from 'react';
