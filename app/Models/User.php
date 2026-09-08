@@ -174,6 +174,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's company profile.
+     */
+    public function companyProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(CompanyProfile::class);
+    }
+
+    /**
      * Return the full URL for the avatar so the API always exposes
      * an absolute URL instead of a raw storage path.
      */

@@ -804,7 +804,7 @@ export default function Dashboard({
 
                         {/* Chart Render Area */}
                         <div className="relative h-[290px] w-full pt-2">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                 <AreaChart data={activeChartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="tealGradient" x1="0" y1="0" x2="0" y2="1">
@@ -903,7 +903,7 @@ export default function Dashboard({
 
                         {/* Donut Chart Container */}
                         <div className="relative h-[200px] w-full my-2 flex items-center justify-center">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                                 <PieChart>
                                     <Pie
                                         data={ROLE_DONUT_DATA}
