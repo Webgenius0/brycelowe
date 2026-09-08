@@ -15,12 +15,12 @@ class SystemSettingSeeder extends Seeder
         SystemSetting::updateOrCreate(
             ['id' => 1],
             [
-                'site_title' => 'Memoooxy',
-                'site_name' => 'Memoooxy',
+                'site_title' => 'Bryce Lowe',
+                'site_name' => 'Bryce Lowe',
                 'logo' => null,
                 'favicon' => null,
-                'copyright_text' => 'Copyright © 2026. All Rights Reserved. Powered by Memoooxy.',
-                'description' => 'Memoooxy - Modern Platform & Services',
+                'copyright_text' => 'Copyright © 2026. All Rights Reserved. Bryce Lowe.',
+                'description' => 'Bryce Lowe - Platform & Services',
             ]
         );
     }

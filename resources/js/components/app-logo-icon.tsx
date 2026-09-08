@@ -13,7 +13,7 @@ export default function AppLogo({ className }: any) {
                     : `/storage/${settings.logo}`))
         : null;
 
-    const siteName = settings?.site_name || settings?.site_title || 'Memoooxy';
+    const siteName = settings?.site_name || settings?.site_title || 'Bryce Lowe';
 
     return (
         <>
@@ -25,7 +25,7 @@ export default function AppLogo({ className }: any) {
                 />
             ) : (
                 <span className={`inline-flex items-center gap-2 font-bold text-xl tracking-tight text-foreground ${className || ''}`}>
-                    <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white font-black text-base shadow-sm">
+                    <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#0EADAB] to-[#0A807F] text-white font-black text-base shadow-sm">
                         {siteName.charAt(0).toUpperCase()}
                     </span>
                     <span className="truncate">{siteName}</span>

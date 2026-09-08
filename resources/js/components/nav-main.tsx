@@ -67,7 +67,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     <CollapsibleTrigger asChild>
                                         <SidebarMenuButton
                                             tooltip={{ children: item.title }}
-                                            className="cursor-pointer transition-all duration-300 ease-in-out hover:bg-red-500/15 data-[state=open]:bg-red-500/15"
+                                            className="cursor-pointer transition-all duration-300 ease-in-out hover:bg-[#0EADAB]/15 data-[state=open]:bg-[#0EADAB]/15 hover:text-[#0A7B7A]"
                                         >
                                             {item.icon && <item.icon />}
                                             <span>{item.title}</span>
@@ -89,7 +89,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                                                   )
                                                                 : false
                                                         }
-                                                        className="cursor-pointer transition-colors duration-200 hover:bg-red-500/10"
+                                                        className="cursor-pointer transition-colors duration-200 hover:bg-[#0EADAB]/10 data-[active=true]:bg-[#0EADAB] data-[active=true]:text-white"
                                                         onClick={
                                                             handleLinkClick
                                                         }
@@ -130,7 +130,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     item.href ? isCurrentUrl(item.href) : false
                                 }
                                 tooltip={{ children: item.title }}
-                                className="cursor-pointer transition-all duration-200 ease-in-out hover:bg-red-500/15"
+                                className="cursor-pointer transition-all duration-200 ease-in-out hover:bg-[#0EADAB]/15 hover:text-[#0A7B7A] data-[active=true]:bg-[#0EADAB] data-[active=true]:text-white"
                                 onClick={handleLinkClick}
                             >
                                 <Link href={item.href || '#'} prefetch>
