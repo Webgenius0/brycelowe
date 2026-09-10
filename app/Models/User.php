@@ -209,4 +209,31 @@ class User extends Authenticatable
         // Resolve from public disk
         return url($path);
     }
+
+    /**
+     * Get the user's support tickets.
+     */
+    public function tickets(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Ticket::class);
+    }
+
+    /**
+     * Get the user's subscriptions.
+     */
+    public function subscriptions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Get the user's billing records.
+     */
+    public function billings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Billing::class);
+    }
 }
+
+
+

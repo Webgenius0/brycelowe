@@ -7,10 +7,14 @@ import {
     FileText,
     HelpCircle,
     LayoutGrid,
+    LifeBuoy,
     LogOut,
     Mail,
+    Receipt,
     Users,
 } from 'lucide-react';
+
+
 
 import { useState } from 'react';
 
@@ -66,15 +70,27 @@ const mainNavItems: NavItem[] = [
         icon: CreditCard,
     },
     {
+        title: 'Subscriptions',
+        href: '/subscription',
+        icon: Receipt,
+    },
+
+    {
         title: 'Newsletter',
         href: '/newsletter',
         icon: Mail,
+    },
+    {
+        title: 'Support Tickets',
+        href: '/ticket',
+        icon: LifeBuoy,
     },
     {
         title: 'Dynamic Pages',
         href: '/dynamic',
         icon: FileText,
     },
+
     {
         title: 'FAQ',
         href: '/faq',

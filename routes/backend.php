@@ -4,8 +4,12 @@ use App\Http\Controllers\Web\Company\CompanyProfileController;
 use App\Http\Controllers\Web\Dynamic\DynamicPageController;
 use App\Http\Controllers\Web\Faq\FaqController;
 use App\Http\Controllers\Web\Plan\PlanController;
+use App\Http\Controllers\Web\Subscription\SubscriptionController;
+use App\Http\Controllers\Web\Ticket\TicketController;
 use App\Http\Controllers\Web\User\UserController;
 use Illuminate\Support\Facades\Route;
+
+
 
 // --- Users ---
 Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -38,7 +42,9 @@ Route::get('/plan', [PlanController::class, 'index'])->name('plan.index');
 Route::post('/plan/store', [PlanController::class, 'store'])->name('plan.store');
 Route::patch('/plan/update/{id}', [PlanController::class, 'update'])->name('plan.update');
 Route::post('/plan/toggle/{id}', [PlanController::class, 'toggleStatus'])->name('plan.toggle');
+Route::post('/plan/discount/toggle/{id}', [PlanController::class, 'toggleDiscountStatus'])->name('plan.discount.toggle');
 Route::delete('/plan/destroy/{id}', [PlanController::class, 'destroy'])->name('plan.destroy');
+
 
 // --- Company Profiles ---
 Route::get('/companies', [CompanyProfileController::class, 'index'])->name('companies.index');
@@ -46,4 +52,23 @@ Route::get('/company', [CompanyProfileController::class, 'index'])->name('compan
 Route::post('/company/store', [CompanyProfileController::class, 'store'])->name('company.store');
 Route::patch('/company/update/{id}', [CompanyProfileController::class, 'update'])->name('company.update');
 Route::delete('/company/destroy/{id}', [CompanyProfileController::class, 'destroy'])->name('company.destroy');
+
+// --- Support Tickets ---
+Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+Route::get('/ticket', [TicketController::class, 'index'])->name('ticket.index');
+Route::post('/ticket/store', [TicketController::class, 'store'])->name('ticket.store');
+Route::post('/ticket/update/{id}', [TicketController::class, 'update'])->name('ticket.update');
+Route::post('/ticket/status/{id}', [TicketController::class, 'updateStatus'])->name('ticket.status');
+Route::delete('/ticket/destroy/{id}', [TicketController::class, 'destroy'])->name('ticket.destroy');
+
+// --- Subscriptions & Billing ---
+Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
+Route::post('/subscription/store', [SubscriptionController::class, 'store'])->name('subscription.store');
+Route::patch('/subscription/update/{id}', [SubscriptionController::class, 'update'])->name('subscription.update');
+Route::post('/subscription/status/{id}', [SubscriptionController::class, 'updateStatus'])->name('subscription.status');
+Route::post('/subscription/overusage/{id}', [SubscriptionController::class, 'recordOverusage'])->name('subscription.overusage');
+Route::delete('/subscription/destroy/{id}', [SubscriptionController::class, 'destroy'])->name('subscription.destroy');
+
+
 

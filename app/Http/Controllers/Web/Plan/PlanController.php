@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Web\Plan;
 
 use App\Http\Controllers\Controller;
+use App\Models\Discount;
+use App\Models\OveragesRate;
 use App\Models\Plan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +18,7 @@ class PlanController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = Plan::query();
+        $query = Plan::query()->with(['overagesRates', 'discounts']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -69,9 +71,19 @@ class PlanController extends Controller
             'is_active' => 'boolean',
             'is_trial' => 'boolean',
             'trial_period' => 'nullable|integer|min:0',
+            'overages_rates' => 'nullable|array',
+            'overages_rates.*.overages_type' => 'required|in:CALL,REPORT,PLAYBOOK,CALIBRATION',
+            'overages_rates.*.overages_rate' => 'required|numeric|min:0',
+            'discounts' => 'nullable|array',
+            'discounts.*.title' => 'required|string|max:255',
+            'discounts.*.code' => 'required|string|max:255',
+            'discounts.*.percent' => 'nullable|integer|min:0|max:100',
+            'discounts.*.amount' => 'nullable|numeric|min:0',
+            'discounts.*.valid_until' => 'nullable|date',
+            'discounts.*.is_active' => 'nullable|boolean',
         ]);
 
-        Plan::create([
+        $plan = Plan::create([
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'price' => $validated['price'],
@@ -85,6 +97,28 @@ class PlanController extends Controller
             'is_trial' => $request->boolean('is_trial', false),
             'trial_period' => $validated['trial_period'] ?? 0,
         ]);
+
+        if (!empty($validated['overages_rates'])) {
+            foreach ($validated['overages_rates'] as $rate) {
+                $plan->overagesRates()->create([
+                    'overages_type' => $rate['overages_type'],
+                    'overages_rate' => $rate['overages_rate'] ?? 0.00,
+                ]);
+            }
+        }
+
+        if (!empty($validated['discounts'])) {
+            foreach ($validated['discounts'] as $discount) {
+                $plan->discounts()->create([
+                    'title' => $discount['title'],
+                    'code' => $discount['code'],
+                    'percent' => $discount['percent'] ?? 0,
+                    'amount' => $discount['amount'] ?? 0.00,
+                    'valid_until' => !empty($discount['valid_until']) ? $discount['valid_until'] : null,
+                    'is_active' => isset($discount['is_active']) ? (bool) $discount['is_active'] : true,
+                ]);
+            }
+        }
 
         return redirect()->route('plan.index')->with('success', 'Plan created successfully.');
     }
@@ -109,6 +143,17 @@ class PlanController extends Controller
             'is_active' => 'boolean',
             'is_trial' => 'boolean',
             'trial_period' => 'nullable|integer|min:0',
+            'overages_rates' => 'nullable|array',
+            'overages_rates.*.overages_type' => 'required|in:CALL,REPORT,PLAYBOOK,CALIBRATION',
+            'overages_rates.*.overages_rate' => 'required|numeric|min:0',
+            'discounts' => 'nullable|array',
+            'discounts.*.id' => 'nullable|integer',
+            'discounts.*.title' => 'required|string|max:255',
+            'discounts.*.code' => 'required|string|max:255',
+            'discounts.*.percent' => 'nullable|integer|min:0|max:100',
+            'discounts.*.amount' => 'nullable|numeric|min:0',
+            'discounts.*.valid_until' => 'nullable|date',
+            'discounts.*.is_active' => 'nullable|boolean',
         ]);
 
         $plan->update([
@@ -126,6 +171,36 @@ class PlanController extends Controller
             'trial_period' => $validated['trial_period'] ?? 0,
         ]);
 
+        // Sync overages rates
+        if ($request->has('overages_rates')) {
+            $plan->overagesRates()->delete();
+            if (!empty($validated['overages_rates'])) {
+                foreach ($validated['overages_rates'] as $rate) {
+                    $plan->overagesRates()->create([
+                        'overages_type' => $rate['overages_type'],
+                        'overages_rate' => $rate['overages_rate'] ?? 0.00,
+                    ]);
+                }
+            }
+        }
+
+        // Sync discounts
+        if ($request->has('discounts')) {
+            $plan->discounts()->delete();
+            if (!empty($validated['discounts'])) {
+                foreach ($validated['discounts'] as $discount) {
+                    $plan->discounts()->create([
+                        'title' => $discount['title'],
+                        'code' => $discount['code'],
+                        'percent' => $discount['percent'] ?? 0,
+                        'amount' => $discount['amount'] ?? 0.00,
+                        'valid_until' => !empty($discount['valid_until']) ? $discount['valid_until'] : null,
+                        'is_active' => isset($discount['is_active']) ? (bool) $discount['is_active'] : true,
+                    ]);
+                }
+            }
+        }
+
         return redirect()->route('plan.index')->with('success', 'Plan updated successfully.');
     }
 
@@ -139,6 +214,18 @@ class PlanController extends Controller
 
         $status = $plan->is_active ? 'activated' : 'deactivated';
         return back()->with('success', "Plan has been {$status}.");
+    }
+
+    /**
+     * Toggle active status of a discount.
+     */
+    public function toggleDiscountStatus(int $id): RedirectResponse
+    {
+        $discount = Discount::findOrFail($id);
+        $discount->update(['is_active' => !$discount->is_active]);
+
+        $status = $discount->is_active ? 'activated' : 'deactivated';
+        return back()->with('success', "Discount code '{$discount->code}' has been {$status}.");
     }
 
     /**

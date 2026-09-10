@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 #[Fillable([
     'name',
     'description',
@@ -59,4 +61,30 @@ class Plan extends Model
             }
         });
     }
+
+    /**
+     * Get the overages rates for the plan.
+     */
+    public function overagesRates(): HasMany
+    {
+        return $this->hasMany(OveragesRate::class);
+    }
+
+    /**
+     * Get the discounts for the plan.
+     */
+    public function discounts(): HasMany
+    {
+        return $this->hasMany(Discount::class);
+    }
+
+    /**
+     * Get the subscriptions for the plan.
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
 }
+
+
