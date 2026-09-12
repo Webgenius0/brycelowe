@@ -21,6 +21,9 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('api-tester', function () {
+        return inertia('api-tester');
+    })->name('api.tester');
 
     // Notification routes
     Route::prefix('notifications')->name('notification.')->group(function () {

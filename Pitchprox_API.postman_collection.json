@@ -1,0 +1,652 @@
+{
+	"info": {
+		"_postman_id": "8f2e64b8-2a90-4c3e-a89e-272e5192080a",
+		"name": "Pitchprox API Collection",
+		"description": "Comprehensive REST API Collection for Pitchprox Backend: Auth, Profile, System Settings, Dynamic Pages, Plans & Discounts, Support Tickets, Subscriptions, Usages & Billing.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication & Profile",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "register"]
+						}
+					}
+				},
+				{
+					"name": "Verify OTP (Registration)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/verify_otp",
+							"host": ["{{base_url}}"],
+							"path": ["api", "verify_otp"]
+						}
+					}
+				},
+				{
+					"name": "Resend OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/resend_otp",
+							"host": ["{{base_url}}"],
+							"path": ["api", "resend_otp"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.token) {",
+									"    pm.environment.set(\"token\", jsonData.data.token);",
+									"} else if (jsonData.token) {",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@admin.com\",\n    \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "login"]
+						}
+					}
+				},
+				{
+					"name": "Social Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"provider\": \"google\",\n    \"provider_id\": \"1234567890\",\n    \"email\": \"user@gmail.com\",\n    \"name\": \"Google User\",\n    \"avatar\": \"https://example.com/avatar.png\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login/social",
+							"host": ["{{base_url}}"],
+							"path": ["api", "login", "social"]
+						}
+					}
+				},
+				{
+					"name": "Forgot Password - Send OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/forgot-password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "forgot-password"]
+						}
+					}
+				},
+				{
+					"name": "Forgot Password - Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/forgot-verify-otp",
+							"host": ["{{base_url}}"],
+							"path": ["api", "forgot-verify-otp"]
+						}
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reset-password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reset-password"]
+						}
+					}
+				},
+				{
+					"name": "Get Authenticated User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/user-detail",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user-detail"]
+						}
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "John Updated", "type": "text" },
+								{ "key": "phone", "value": "+1987654321", "type": "text" }
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/profile/update",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile", "update"]
+						}
+					}
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"password123\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/change-password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "change-password"]
+						}
+					}
+				},
+				{
+					"name": "Delete Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/account-delete",
+							"host": ["{{base_url}}"],
+							"path": ["api", "account-delete"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "logout"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "System & Dynamic Pages",
+			"item": [
+				{
+					"name": "Get System Settings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/system-setting",
+							"host": ["{{base_url}}"],
+							"path": ["api", "system-setting"]
+						}
+					}
+				},
+				{
+					"name": "List FAQs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/faq",
+							"host": ["{{base_url}}"],
+							"path": ["api", "faq"]
+						}
+					}
+				},
+				{
+					"name": "List Dynamic Pages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/dynamic-pages",
+							"host": ["{{base_url}}"],
+							"path": ["api", "dynamic-pages"]
+						}
+					}
+				},
+				{
+					"name": "Get Page By Slug",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/page/terms-and-conditions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "page", "terms-and-conditions"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Plans & Discounts",
+			"item": [
+				{
+					"name": "List All Plans",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/plans",
+							"host": ["{{base_url}}"],
+							"path": ["api", "plans"]
+						}
+					}
+				},
+				{
+					"name": "Get Single Plan",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/plans/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "plans", "1"]
+						}
+					}
+				},
+				{
+					"name": "Validate Discount Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SUMMER20\",\n    \"plan_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/plans/check-discount",
+							"host": ["{{base_url}}"],
+							"path": ["api", "plans", "check-discount"]
+						}
+					}
+				},
+				{
+					"name": "Create Plan (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Growth Tier\",\n    \"description\": \"Designed for scaling businesses\",\n    \"price\": 79.00,\n    \"discount_price\": 59.00,\n    \"interval\": \"MONTHLY\",\n    \"call_credit\": 1000,\n    \"report_credit\": 250,\n    \"playbook_credit\": 50,\n    \"calibration_credit\": 10,\n    \"is_active\": true,\n    \"is_trial\": true,\n    \"trial_period\": 7,\n    \"overages_rates\": [\n        { \"overages_type\": \"CALL\", \"overages_rate\": 0.05 },\n        { \"overages_type\": \"REPORT\", \"overages_rate\": 0.15 },\n        { \"overages_type\": \"PLAYBOOK\", \"overages_rate\": 0.50 },\n        { \"overages_type\": \"CALIBRATION\", \"overages_rate\": 1.00 }\n    ],\n    \"discounts\": [\n        {\n            \"title\": \"Launch Special\",\n            \"code\": \"LAUNCH20\",\n            \"percent\": 20,\n            \"amount\": 0,\n            \"valid_until\": \"2026-12-31\",\n            \"is_active\": true\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/plans",
+							"host": ["{{base_url}}"],
+							"path": ["api", "plans"]
+						}
+					}
+				},
+				{
+					"name": "Update Plan (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Growth Tier Pro\",\n    \"price\": 89.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/plans/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "plans", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Plan (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/plans/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "plans", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Support Tickets",
+			"item": [
+				{
+					"name": "List User Tickets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					}
+				},
+				{
+					"name": "Create Support Ticket (Multipart)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "category", "value": "TECHNICAL", "type": "text" },
+								{ "key": "priority", "value": "HIGH", "type": "text" },
+								{ "key": "subject", "value": "Webhook delivery failure", "type": "text" },
+								{ "key": "message", "value": "Getting 500 error when receiving postback", "type": "text" }
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets"]
+						}
+					}
+				},
+				{
+					"name": "Get Ticket Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tickets/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Ticket Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"RESOLVED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tickets/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "Delete Ticket",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tickets/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tickets", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Subscriptions, Usages & Billing",
+			"item": [
+				{
+					"name": "List User Subscriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "subscriptions"]
+						}
+					}
+				},
+				{
+					"name": "Subscribe to Plan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"plan_id\": 1,\n    \"discount_code\": \"LAUNCH20\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "subscriptions"]
+						}
+					}
+				},
+				{
+					"name": "Get Subscription Details with Usage",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "subscriptions", "1"]
+						}
+					}
+				},
+				{
+					"name": "Record Overusage Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"overusages_type\": \"CALL\",\n    \"credit\": 50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions/1/overusage",
+							"host": ["{{base_url}}"],
+							"path": ["api", "subscriptions", "1", "overusage"]
+						}
+					}
+				},
+				{
+					"name": "Cancel Subscription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions/1/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["api", "subscriptions", "1", "cancel"]
+						}
+					}
+				},
+				{
+					"name": "List User Billing Invoices",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/billings",
+							"host": ["{{base_url}}"],
+							"path": ["api", "billings"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000"
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	]
+}

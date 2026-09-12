@@ -18,9 +18,12 @@ return new class extends Migration
             }
         });
 
-        // Modify the role column to support new roles
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('SUPERADMIN', 'SELS', 'MANAGER', 'AUDIOTOR', 'Admin', 'User', 'Partner') DEFAULT 'SUPERADMIN'");
+        // Modify the role column to support new roles if running on MySQL
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('SUPERADMIN', 'SELS', 'MANAGER', 'AUDIOTOR', 'Admin', 'User', 'Partner') DEFAULT 'SUPERADMIN'");
+        }
     }
+
 
     /**
      * Reverse the migrations.
