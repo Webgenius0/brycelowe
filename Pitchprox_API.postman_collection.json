@@ -823,6 +823,81 @@
 			]
 		},
 		{
+			"name": "Prospect Mail & Support",
+			"item": [
+				{
+					"name": "Send Prospect Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"to\": \"prospect@example.com\",\n    \"cc\": \"team@pitchprox.com\",\n    \"subject\": \"Exclusive update on your property valuation\",\n    \"message\": \"Hi {First Name},\\n\\nI wanted to share the latest market insights for {Property Address}.\\n\\nBest regards,\\nPitchProX Team\",\n    \"is_tracked\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/mail/send",
+							"host": ["{{base_url}}"],
+							"path": ["api", "mail", "send"]
+						}
+					}
+				},
+				{
+					"name": "List Recent Prospect Emails",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/mail/recents",
+							"host": ["{{base_url}}"],
+							"path": ["api", "mail", "recents"]
+						}
+					}
+				},
+				{
+					"name": "Get Quick Email Templates",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/mail/templates",
+							"host": ["{{base_url}}"],
+							"path": ["api", "mail", "templates"]
+						}
+					}
+				},
+				{
+					"name": "AI Email Assistant Copy Generator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"prompt\": \"Follow up after an initial phone consultation regarding property listing\",\n    \"tone\": \"Professional\",\n    \"recipient_name\": \"Sarah\",\n    \"property_address\": \"742 Evergreen Terrace\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/mail/ai-assist",
+							"host": ["{{base_url}}"],
+							"path": ["api", "mail", "ai-assist"]
+						}
+					}
+				}
+			]
+		},
+		{
 			"name": "Admin APIs",
 			"item": [
 				{
@@ -1195,6 +1270,76 @@
 									"raw": "{{base_url}}/api/admin/faqs",
 									"host": ["{{base_url}}"],
 									"path": ["api", "admin", "faqs"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Mail & Template Management (Admin)",
+					"item": [
+						{
+							"name": "List All Platform Prospect Emails",
+							"request": {
+								"method": "GET",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{token}}" }
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/mail/emails",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "mail", "emails"]
+								}
+							}
+						},
+						{
+							"name": "Get Email Details",
+							"request": {
+								"method": "GET",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{token}}" }
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/mail/emails/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "mail", "emails", "1"]
+								}
+							}
+						},
+						{
+							"name": "List Email Templates (Admin)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{token}}" }
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/mail/templates",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "mail", "templates"]
+								}
+							}
+						},
+						{
+							"name": "Create Email Template (Admin)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{ "key": "Accept", "value": "application/json" },
+									{ "key": "Content-Type", "value": "application/json" },
+									{ "key": "Authorization", "value": "Bearer {{token}}" }
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Custom Followup\",\n    \"subject\": \"Property update for {Property Address}\",\n    \"body\": \"Hi {First Name},\\n\\nHere are the latest insights...\",\n    \"category\": \"Followup\",\n    \"is_system\": true\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/admin/mail/templates",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "mail", "templates"]
 								}
 							}
 						}

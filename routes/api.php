@@ -102,4 +102,10 @@ Route::group(['middleware' => ['auth:sanctum', 'check.status']], function () {
     Route::post('/plans', [PlanController::class, 'store']);
     Route::put('/plans/{id}', [PlanController::class, 'update']);
     Route::delete('/plans/{id}', [PlanController::class, 'destroy']);
+
+    // Prospect Mail & Support API
+    Route::get('/mail/recents', [\App\Http\Controllers\API\MailApiController::class, 'recents']);
+    Route::get('/mail/templates', [\App\Http\Controllers\API\MailApiController::class, 'templates']);
+    Route::post('/mail/send', [\App\Http\Controllers\API\MailApiController::class, 'send']);
+    Route::post('/mail/ai-assist', [\App\Http\Controllers\API\MailApiController::class, 'aiAssist']);
 });

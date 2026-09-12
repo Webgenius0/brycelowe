@@ -3,6 +3,7 @@ import { Link } from '@inertiajs/react';
 import {
     Code2,
     LayoutGrid,
+    Mail,
 } from 'lucide-react';
 
 import AppLogo from '@/components/app-logo';

@@ -42,6 +42,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/broadcast', [\App\Http\Controllers\Web\NewsletterController::class, 'sendBroadcast'])->name('broadcast');
         Route::get('/export', [\App\Http\Controllers\Web\NewsletterController::class, 'export'])->name('export');
     });
+
+    // Mail & Support routes
+    Route::prefix('mail')->name('mail.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Web\Mail\MailSupportController::class, 'index'])->name('index');
+        Route::post('/send', [\App\Http\Controllers\Web\Mail\MailSupportController::class, 'send'])->name('send');
+        Route::post('/draft', [\App\Http\Controllers\Web\Mail\MailSupportController::class, 'saveDraft'])->name('draft');
+        Route::post('/ai-assist', [\App\Http\Controllers\Web\Mail\MailSupportController::class, 'aiAssist'])->name('aiAssist');
+    });
 });
 
 // Public newsletter subscription route

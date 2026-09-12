@@ -98,3 +98,15 @@ Route::prefix('system-settings')->group(function () {
     Route::get('/', [AdminSystemSettingController::class, 'show']);
     Route::match(['put', 'patch', 'post'], '/', [AdminSystemSettingController::class, 'update']);
 });
+
+// 10. Prospect Emails & Template Management
+Route::prefix('mail')->group(function () {
+    Route::get('/emails', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'index']);
+    Route::get('/emails/{id}', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'show']);
+    Route::delete('/emails/{id}', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'destroy']);
+    Route::post('/send', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'send']);
+    Route::get('/templates', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'templates']);
+    Route::post('/templates', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'storeTemplate']);
+    Route::match(['put', 'patch', 'post'], '/templates/{id}', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'updateTemplate']);
+    Route::delete('/templates/{id}', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'destroyTemplate']);
+});
