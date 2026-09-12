@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function () {
             Route::middleware(['web', 'auth', 'verified'])
                 ->group(base_path('routes/backend.php'));
+
+            Route::middleware(['api', 'auth:sanctum', 'check.status', 'role.admin'])
+                ->prefix('api/admin')
+                ->group(base_path('routes/admin-api.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -38,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'ip.login.throttle' => \App\Http\Middleware\CheckIpLoginThrottle::class,
             'check.status' => \App\Http\Middleware\CheckUserStatus::class,
+            'role.admin' => \App\Http\Middleware\AdminRoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
