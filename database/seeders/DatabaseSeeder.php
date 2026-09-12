@@ -46,6 +46,8 @@ class DatabaseSeeder extends Seeder
             SystemSettingSeeder::class,
             DynamicPageSeeder::class,
             FaqSeeder::class,
+            MailSupportSeeder::class,
+            NotificationChannelSeeder::class,
         ]);
     }
 }

@@ -11,20 +11,31 @@ class LoginActivity extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
+    protected $table = 'login_activities';
 
     protected $fillable = [
         'user_id',
-        'ip_address',
+        'timestamp',
         'device',
         'browser',
         'location',
+        'ip',
+        'ip_address',
         'status',
+        'last_login',
+        'is_active',
+        'is_block',
         'created_at',
+        'updated_at',
     ];
 
     protected $casts = [
+        'timestamp' => 'datetime',
+        'last_login' => 'datetime',
+        'is_active' => 'boolean',
+        'is_block' => 'boolean',
         'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -77,16 +88,25 @@ class LoginActivity extends Model
      */
     public static function record(int $userId, Request $request, string $status = 'Success'): self
     {
+        $ip = $request->ip() ?: '127.0.0.1';
+        $now = now();
+
         return self::create([
             'user_id' => $userId,
-            'ip_address' => $request->ip() ?: '127.0.0.1',
+            'timestamp' => $now,
+            'ip' => $ip,
+            'ip_address' => $ip,
             'device' => self::parseDevice($request),
             'browser' => self::parseBrowser($request),
             'location' => $request->header('CF-IPCity')
                 ? ($request->header('CF-IPCity') . ', ' . ($request->header('CF-IPCountry') ?: 'USA'))
                 : 'Austin, TX, USA',
             'status' => $status,
-            'created_at' => now(),
+            'last_login' => $now,
+            'is_active' => true,
+            'is_block' => false,
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
     }
 }

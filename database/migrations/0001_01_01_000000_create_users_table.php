@@ -29,6 +29,8 @@ return new class extends Migration
             $table->boolean('enable2fa')->default(false);
             $table->text('avatar')->nullable();
             $table->text('address')->nullable();
+            $table->string('language', 10)->default('en');
+            $table->string('timezone', 100)->default('UTC');
             $table->boolean('terms')->default(false);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_superuser')->default(false);

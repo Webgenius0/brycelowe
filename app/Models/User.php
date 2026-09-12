@@ -31,7 +31,6 @@ use Laravel\Sanctum\HasApiTokens;
     'address',
     'language',
     'timezone',
-    'notification_preferences',
     'status',
     'role',
     'external_user_role',
@@ -166,30 +165,7 @@ class User extends Authenticatable
             'terms' => 'boolean',
             'last_login' => 'datetime',
             'last_login_at' => 'datetime',
-            'notification_preferences' => 'array',
         ];
-    }
-
-    /**
-     * Get default notification preferences merged with custom saved preferences.
-     */
-    public function getNotificationPreferencesAttribute($value): array
-    {
-        $defaults = [
-            'in_app_notifications' => true,
-            'call_reminders' => true,
-            'follow_up_reminders' => true,
-            'ai_insight_alerts' => true,
-            'billing_alerts' => true,
-            'product_updates' => true,
-        ];
-
-        if (empty($value)) {
-            return $defaults;
-        }
-
-        $decoded = is_string($value) ? json_decode($value, true) : $value;
-        return array_merge($defaults, is_array($decoded) ? $decoded : []);
     }
 
     /**
@@ -277,7 +253,74 @@ class User extends Authenticatable
     {
         return $this->hasMany(Billing::class);
     }
+
+    /**
+     * Get the user's preferences.
+     */
+    public function preferences(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(UserPreferences::class);
+    }
+
+    /**
+     * Get the user's prospect mails.
+     */
+    public function prospectMails(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProspectMail::class);
+    }
+
+    /**
+     * Get the user's assigned/owned leads.
+     */
+    public function leads(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Lead::class, 'lead_by');
+    }
+
+    /**
+     * Get the user's AI training contents.
+     */
+    public function trainingContents(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TrainingContent::class);
+    }
+
+    /**
+     * Get calls handled by this user / agent.
+     */
+    public function agentCalls(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Call::class, 'agent_id');
+    }
+
+    /**
+     * Get user notification preferences/channels entries.
+     */
+    public function userNotifications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
+    /**
+     * Get all notification channels subscribed by this user.
+     */
+    public function notificationChannels(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(NotificationChannel::class, 'user_notifications')
+            ->withPivot('is_active')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get all calibration sessions for this user.
+     */
+    public function calibrations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Calibration::class);
+    }
 }
+
 
 
 

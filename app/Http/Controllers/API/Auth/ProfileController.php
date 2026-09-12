@@ -6,7 +6,9 @@ use App\Concerns\ApiResponse;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\LoginActivity;
+use App\Models\NotificationChannel;
 use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -163,7 +165,24 @@ class ProfileController extends Controller
     public function getNotifications(Request $request)
     {
         $user = $request->user();
-        return $this->ok('Notification preferences retrieved successfully.', $user->notification_preferences);
+        
+        $channels = NotificationChannel::where('is_active', true)->get();
+        $userPrefs = UserNotification::where('user_id', $user->id)
+            ->pluck('is_active', 'notification_channel_id');
+
+        $result = $channels->map(function ($channel) use ($userPrefs) {
+            return [
+                'id' => $channel->id,
+                'channel_id' => $channel->id,
+                'title' => $channel->title,
+                'description' => $channel->description,
+                'logo' => $channel->logo,
+                'channel_type' => $channel->channel_type,
+                'is_active' => $userPrefs->has($channel->id) ? (bool) $userPrefs[$channel->id] : true,
+            ];
+        });
+
+        return $this->ok('Notification preferences retrieved successfully.', $result);
     }
 
     /**
@@ -171,37 +190,69 @@ class ProfileController extends Controller
      */
     public function updateNotifications(Request $request)
     {
-        $request->validate([
-            'in_app_notifications' => 'nullable|boolean',
-            'call_reminders' => 'nullable|boolean',
-            'follow_up_reminders' => 'nullable|boolean',
-            'ai_insight_alerts' => 'nullable|boolean',
-            'billing_alerts' => 'nullable|boolean',
-            'product_updates' => 'nullable|boolean',
-        ]);
-
         $user = $request->user();
-        $current = $user->notification_preferences;
 
-        $fields = [
-            'in_app_notifications',
-            'call_reminders',
-            'follow_up_reminders',
-            'ai_insight_alerts',
-            'billing_alerts',
-            'product_updates',
-        ];
+        // 1. Array of channels: [{ "channel_id": 1, "is_active": false }]
+        if ($request->has('channels') && is_array($request->input('channels'))) {
+            foreach ($request->input('channels') as $item) {
+                if (isset($item['channel_id'])) {
+                    UserNotification::updateOrCreate(
+                        [
+                            'user_id' => $user->id,
+                            'notification_channel_id' => $item['channel_id'],
+                        ],
+                        [
+                            'is_active' => filter_var($item['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                        ]
+                    );
+                }
+            }
+        } elseif ($request->has('channel_id')) {
+            // 2. Single channel update
+            $request->validate([
+                'channel_id' => 'required|exists:notification_channels,id',
+                'is_active' => 'required|boolean',
+            ]);
 
-        foreach ($fields as $field) {
-            if ($request->has($field)) {
-                $current[$field] = filter_var($request->input($field), FILTER_VALIDATE_BOOLEAN);
+            UserNotification::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'notification_channel_id' => $request->input('channel_id'),
+                ],
+                [
+                    'is_active' => filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN),
+                ]
+            );
+        } else {
+            // 3. Named field mapping
+            $fieldMapping = [
+                'in_app_notifications' => NotificationChannel::TYPE_IN_APP,
+                'call_reminders' => NotificationChannel::TYPE_CALL_REMAINDER,
+                'follow_up_reminders' => NotificationChannel::TYPE_FOLLOW_UP,
+                'ai_insight_alerts' => NotificationChannel::TYPE_AI_INSIGHT,
+                'billing_alerts' => NotificationChannel::TYPE_BILLING,
+                'product_updates' => NotificationChannel::TYPE_PRODUCT,
+            ];
+
+            foreach ($fieldMapping as $field => $channelType) {
+                if ($request->has($field)) {
+                    $channel = NotificationChannel::where('channel_type', $channelType)->first();
+                    if ($channel) {
+                        UserNotification::updateOrCreate(
+                            [
+                                'user_id' => $user->id,
+                                'notification_channel_id' => $channel->id,
+                            ],
+                            [
+                                'is_active' => filter_var($request->input($field), FILTER_VALIDATE_BOOLEAN),
+                            ]
+                        );
+                    }
+                }
             }
         }
 
-        $user->notification_preferences = $current;
-        $user->save();
-
-        return $this->success('Notification preferences updated successfully.', $user->notification_preferences, 200);
+        return $this->getNotifications($request);
     }
 
     /**
