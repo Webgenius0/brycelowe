@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\Auth\LoginController;
+use App\Http\Controllers\API\Auth\ProfileController;
 use App\Http\Controllers\API\Auth\ProfileUpdateController;
 use App\Http\Controllers\API\Auth\RegisterController;
 use App\Http\Controllers\API\Auth\SocialLoginController;
@@ -44,13 +45,43 @@ Route::middleware(['guest'])->group(function () {
 
 // Authenticated Routes
 Route::group(['middleware' => ['auth:sanctum', 'check.status']], function () {
-    Route::get('/user-detail', [LoginController::class, 'userDetails']);
+    Route::get('/user-detail', [ProfileController::class, 'me']);
     Route::post('/logout', [LoginController::class, 'logout']);
 
-    // Profile update routes
-    Route::post('/change-password', [ProfileUpdateController::class, 'changePassword']);
-    Route::post('/account-delete', [ProfileUpdateController::class, 'accountDelete']);
-    Route::post('/profile/update', [ProfileUpdateController::class, 'updateDetails']);
+    // 1. Profile Information & Full Name Update
+    Route::post('/profile/update', [ProfileController::class, 'updateName']);
+    Route::post('/profile/name', [ProfileController::class, 'updateName']);
+
+    // 2. Avatar Management (Upload / Delete)
+    Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
+    Route::post('/profile/upload-avatar', [ProfileController::class, 'uploadAvatar']);
+    Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar']);
+    Route::post('/profile/delete-avatar', [ProfileController::class, 'deleteAvatar']);
+
+    // 3. Language & Timezone Preferences
+    Route::get('/profile/preferences', [ProfileController::class, 'getPreferences']);
+    Route::post('/profile/preferences', [ProfileController::class, 'updatePreferences']);
+    Route::post('/profile/language-timezone', [ProfileController::class, 'updatePreferences']);
+
+    // 4. Notification Preferences
+    Route::get('/profile/notifications', [ProfileController::class, 'getNotifications']);
+    Route::post('/profile/notifications', [ProfileController::class, 'updateNotifications']);
+
+    // 5. 2FA Security Management
+    Route::get('/profile/2fa', [ProfileController::class, 'get2FAStatus']);
+    Route::post('/profile/2fa/toggle', [ProfileController::class, 'toggle2FA']);
+    Route::post('/profile/2fa/enable', [ProfileController::class, 'toggle2FA']);
+    Route::post('/profile/2fa/disable', [ProfileController::class, 'toggle2FA']);
+
+    // 6. Login Activity History & Devices
+    Route::get('/profile/login-activity', [ProfileController::class, 'loginActivity']);
+    Route::get('/profile/devices', [ProfileController::class, 'getDevices']);
+    Route::post('/profile/devices/logout-others', [ProfileController::class, 'logoutOtherDevices']);
+    Route::delete('/profile/devices/{id}', [ProfileController::class, 'revokeDevice']);
+
+    // 7. Password & Account Deletion
+    Route::post('/change-password', [ProfileController::class, 'changePassword']);
+    Route::post('/account-delete', [ProfileController::class, 'deleteAccount']);
 
     // Support Tickets API
     Route::get('/tickets', [TicketController::class, 'index']);

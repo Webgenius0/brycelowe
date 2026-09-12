@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Auth;
 use App\Concerns\ApiResponse;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Models\LoginActivity;
 use App\Models\User;
 use Carbon\Carbon;
 use Ichtrojan\Otp\Otp;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -24,7 +26,7 @@ class RegisterController extends Controller
             'email' => 'required|email',
             'name' => 'required|string|max:255',
             'password' => 'required|min:6|confirmed',
-            'role' => 'required|in:User,Partner',
+            'role' => 'nullable|string|in:SUPERADMIN,SELS,MANAGER,AUDIOTOR,Admin,User,Partner,USER',
         ]);
 
         DB::beginTransaction();
@@ -45,17 +47,25 @@ class RegisterController extends Controller
                 }
 
                 // Update unverified user data
-                $user->update([
+                $updateData = [
                     'name' => $request->name,
+                    'status' => 'Active',
+                    'is_active' => true,
                     'password' => Hash::make($request->password),
-                ]);
+                ];
+                if ($request->filled('role')) {
+                    $updateData['role'] = $request->role;
+                }
+                $user->update($updateData);
             } else {
 
-                // Create new user
+                // Create new user (default role to 'USER' if not provided)
                 $user = User::create([
                     'name' => $request->name,
                     'email' => $request->email,
-                    'role' => $request->role,
+                    'role' => $request->role ?? 'USER',
+                    'status' => 'Active',
+                    'is_active' => true,
                     'password' => Hash::make($request->password),
                 ]);
             }
@@ -75,7 +85,7 @@ class RegisterController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => '6 digit OTP sent successfully.',
+                'message' => '4 digit OTP sent successfully.',
                 'data' => $user,
                 'otp' => $otpToken,
             ], 201);
@@ -92,7 +102,7 @@ class RegisterController extends Controller
 
     public function send_otp(User $user, $mailType = 'verify')
     {
-        $otp = (new Otp)->generate($user->email, 'numeric', 6, 5);
+        $otp = (new Otp)->generate($user->email, 'numeric', 4, 5);
         $message = $mailType === 'verify' ? 'Verify Your Email Address' : 'Reset Your Password';
         Mail::to($user->email)->send(new \App\Mail\OTP($otp->token, $user, $message, $mailType));
         return $otp;
@@ -106,7 +116,7 @@ class RegisterController extends Controller
 
         try {
             $user = User::where('email', $request->email)->first();
-            $otp = (new Otp)->generate($request->email, 'numeric', 6, 5);
+            $otp = (new Otp)->generate($request->email, 'numeric', 4, 5);
             $message = $mailType === 'verify' ? 'Verify Your Email Address' : 'Reset Your Password';
 
             Mail::to($request->email)->send(new \App\Mail\OTP($otp->token, $user, $message, $mailType));
@@ -123,7 +133,7 @@ class RegisterController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'otp' => 'required|digits:6',
+            'otp' => 'required|digits:4',
         ]);
 
         $verify = (new Otp)->validate($request->email, $request->otp);
@@ -151,11 +161,20 @@ class RegisterController extends Controller
             $user->forceFill(['email_verified_at' => now()])->save();
         }
 
+        // Log login activity
+        try {
+            LoginActivity::record($user->id, $request, 'Success');
+        } catch (\Exception $e) {
+            Log::error('Failed to log login activity: ' . $e->getMessage());
+        }
+
+        $deviceName = $request->device_name ?: LoginActivity::parseDevice($request);
+
         return response()->json([
             'status' => true,
             'message' => 'Email verified successfully.',
             'token_type' => 'Bearer',
-            'token' => $user->createToken('AuthToken')->plainTextToken,
+            'token' => $user->createToken($deviceName)->plainTextToken,
             'data' => $user,
         ]);
     }
@@ -180,7 +199,7 @@ class RegisterController extends Controller
     {
         $request->validate([
             'email' => 'required|string|email',
-            'otp' => 'required|string|digits:6',
+            'otp' => 'required|string|digits:4',
         ]);
 
         $verify = (new Otp)->validate($request->email, $request->otp);
@@ -189,7 +208,7 @@ class RegisterController extends Controller
             if (!$user) {
                 return Helper::jsonErrorResponse('Email not found', 404);
             }
-            $user->reset_code = \Str::random(40);
+            $user->reset_code = Str::random(40);
             $user->reset_code_expires_at = Carbon::now()->addDays(1);
             $user->save();
 

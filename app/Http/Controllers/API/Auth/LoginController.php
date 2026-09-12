@@ -5,8 +5,11 @@ namespace App\Http\Controllers\API\Auth;
 use App\Concerns\ApiResponse;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Models\LoginActivity;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class LoginController extends Controller
@@ -30,23 +33,27 @@ class LoginController extends Controller
             ]);
         }
 
-        if (Auth::user()->email_verified_at === null) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($user->email_verified_at === null) {
             return Helper::jsonErrorResponse('Email not verified.', 403, []);
         }
 
-        if (Auth::user()->status === 'Inactive') {
+        if ($user->status === 'Inactive') {
             Auth::logout();
 
             return Helper::jsonErrorResponse('Your account is inactive. Please contact support.', 403, []);
         }
 
-        if (Auth::user()->status === 'Banned') {
+        if ($user->status === 'Banned') {
             Auth::logout();
 
             return Helper::jsonErrorResponse('Your account has been banned.', 403, []);
         }
 
-        $user = Auth::user();
+        $user->last_login = now();
+        $user->last_login_at = now();
 
         // handle nullable remember_token
         if ($request->remember_token) {
@@ -55,11 +62,20 @@ class LoginController extends Controller
 
         $user->save();
 
+        // Log login activity
+        try {
+            LoginActivity::record($user->id, $request, 'Success');
+        } catch (\Exception $e) {
+            Log::error('Failed to log login activity: ' . $e->getMessage());
+        }
+
+        $deviceName = $request->device_name ?: LoginActivity::parseDevice($request);
+
         return response()->json([
             'status' => true,
             'message' => 'Login Successful',
             'token_type' => 'Bearer',
-            'token' => $user->createToken('AuthToken')->plainTextToken,
+            'token' => $user->createToken($deviceName)->plainTextToken,
             'data' => $user,
         ]);
     }

@@ -29,6 +29,9 @@ use Laravel\Sanctum\HasApiTokens;
     'last_login_at',
     'password',
     'address',
+    'language',
+    'timezone',
+    'notification_preferences',
     'status',
     'role',
     'external_user_role',
@@ -43,6 +46,11 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
+
+    protected $attributes = [
+        'status' => 'Active',
+        'is_active' => true,
+    ];
 
     /**
      * The "booted" method of the model.
@@ -65,6 +73,10 @@ class User extends Authenticatable
             if (empty($user->user_type)) {
                 $user->user_type = ($user->role === 'Admin' || $user->role === 'SUPERADMIN' || $user->is_superuser) ? 'INTERNAL' : 'EXTERNAL';
             }
+            if (empty($user->status)) {
+                $user->status = 'Active';
+                $user->is_active = true;
+            }
         });
 
         static::saving(function (User $user) {
@@ -82,8 +94,9 @@ class User extends Authenticatable
             }
             if (!empty($user->status)) {
                 $user->is_active = ($user->status === 'Active');
-            } elseif (isset($user->is_active)) {
-                $user->status = $user->is_active ? 'Active' : 'Inactive';
+            } else {
+                $user->status = 'Active';
+                $user->is_active = true;
             }
             if (isset($user->enable2fa)) {
                 $user->is_2fa_enabled = $user->enable2fa;
@@ -130,7 +143,7 @@ class User extends Authenticatable
             return $this->attributes['status'] === 'Active';
         }
 
-        return (bool) $value;
+        return $value !== null ? (bool) $value : true;
     }
 
     /**
@@ -153,7 +166,38 @@ class User extends Authenticatable
             'terms' => 'boolean',
             'last_login' => 'datetime',
             'last_login_at' => 'datetime',
+            'notification_preferences' => 'array',
         ];
+    }
+
+    /**
+     * Get default notification preferences merged with custom saved preferences.
+     */
+    public function getNotificationPreferencesAttribute($value): array
+    {
+        $defaults = [
+            'in_app_notifications' => true,
+            'call_reminders' => true,
+            'follow_up_reminders' => true,
+            'ai_insight_alerts' => true,
+            'billing_alerts' => true,
+            'product_updates' => true,
+        ];
+
+        if (empty($value)) {
+            return $defaults;
+        }
+
+        $decoded = is_string($value) ? json_decode($value, true) : $value;
+        return array_merge($defaults, is_array($decoded) ? $decoded : []);
+    }
+
+    /**
+     * User login activities relationship.
+     */
+    public function loginActivities()
+    {
+        return $this->hasMany(LoginActivity::class)->latest('id');
     }
 
     /**

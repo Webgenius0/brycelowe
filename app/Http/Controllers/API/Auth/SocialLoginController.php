@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\API\Auth;
 
 use App\Concerns\ApiResponse;
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Models\LoginActivity;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -30,7 +33,9 @@ class SocialLoginController extends Controller
             $avatar = null;
 
             if ($request->provider_id === 'google') {
-                $socialUser = Socialite::driver('google')->stateless()->userFromToken($request->token);
+                /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+                $driver = Socialite::driver('google');
+                $socialUser = $driver->stateless()->userFromToken($request->token);
                 $email = $socialUser->getEmail();
                 $name = $socialUser->getName() ?: ($email ? explode('@', $email)[0] : 'Google User');
                 $avatar = $socialUser->getAvatar();
@@ -105,7 +110,15 @@ class SocialLoginController extends Controller
             }
 
             Auth::login($user);
-            $token = $user->createToken('AuthToken')->plainTextToken;
+            $deviceName = $request->device_name ?: LoginActivity::parseDevice($request);
+            $token = $user->createToken($deviceName)->plainTextToken;
+
+            // Log login activity
+            try {
+                LoginActivity::record($user->id, $request, 'Success');
+            } catch (\Exception $e) {
+                Log::error('Failed to log login activity: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'status' => true,
@@ -115,7 +128,7 @@ class SocialLoginController extends Controller
                 'data' => $user,
             ]);
         } catch (Exception $e) {
-            \Log::error('Social login failed: '.$e->getMessage());
+            Log::error('Social login failed: '.$e->getMessage());
 
             return $this->error('Something went wrong: '.$e->getMessage(), 500);
         }

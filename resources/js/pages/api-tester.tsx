@@ -131,10 +131,10 @@ const ENDPOINTS: Endpoint[] = [
         },
     },
 
-    // 2. User Profile
+    // 2. User Profile, Preferences & Security
     {
         id: 'profile_user',
-        group: '2. User Profile',
+        group: '2. User Profile & Preferences',
         title: 'Get User Details',
         method: 'GET',
         path: '/user-detail',
@@ -142,47 +142,146 @@ const ENDPOINTS: Endpoint[] = [
         payload: {},
     },
     {
-        id: 'profile_update',
-        group: '2. User Profile',
-        title: 'Update Profile',
+        id: 'profile_update_name',
+        group: '2. User Profile & Preferences',
+        title: 'Update Profile Name (Full Name Only)',
         method: 'POST',
         path: '/profile/update',
         auth: true,
         payload: {
-            name: 'John Lowe Updated',
-            phone: '+1987654321',
+            full_name: 'John Lowe Updated',
         },
     },
     {
+        id: 'profile_delete_avatar',
+        group: '2. User Profile & Preferences',
+        title: 'Delete Avatar',
+        method: 'DELETE',
+        path: '/profile/avatar',
+        auth: true,
+        payload: {},
+    },
+    {
+        id: 'profile_get_preferences',
+        group: '2. User Profile & Preferences',
+        title: 'Get Language & Timezone Preferences',
+        method: 'GET',
+        path: '/profile/preferences',
+        auth: true,
+        payload: {},
+    },
+    {
+        id: 'profile_update_preferences',
+        group: '2. User Profile & Preferences',
+        title: 'Update Language & Timezone',
+        method: 'POST',
+        path: '/profile/preferences',
+        auth: true,
+        payload: {
+            language: 'en',
+            timezone: 'America/Chicago',
+        },
+    },
+    {
+        id: 'profile_get_notifications',
+        group: '2. User Profile & Preferences',
+        title: 'Get Notification Preferences',
+        method: 'GET',
+        path: '/profile/notifications',
+        auth: true,
+        payload: {},
+    },
+    {
+        id: 'profile_update_notifications',
+        group: '2. User Profile & Preferences',
+        title: 'Update Notification Preferences',
+        method: 'POST',
+        path: '/profile/notifications',
+        auth: true,
+        payload: {
+            in_app_notifications: true,
+            call_reminders: true,
+            follow_up_reminders: true,
+            ai_insight_alerts: true,
+            billing_alerts: true,
+            product_updates: true,
+        },
+    },
+    {
+        id: 'profile_2fa_status',
+        group: '2. User Profile & Preferences',
+        title: 'Get 2FA Security Status',
+        method: 'GET',
+        path: '/profile/2fa',
+        auth: true,
+        payload: {},
+    },
+    {
+        id: 'profile_2fa_toggle',
+        group: '2. User Profile & Preferences',
+        title: 'Toggle / Enable 2FA',
+        method: 'POST',
+        path: '/profile/2fa/toggle',
+        auth: true,
+        payload: {
+            enable: true,
+        },
+    },
+    {
+        id: 'profile_login_activity',
+        group: '2. User Profile & Preferences',
+        title: 'Get Login Activity History',
+        method: 'GET',
+        path: '/profile/login-activity',
+        auth: true,
+        payload: {},
+    },
+    {
+        id: 'profile_devices_list',
+        group: '2. User Profile & Preferences',
+        title: 'Get Active Devices & Sessions',
+        method: 'GET',
+        path: '/profile/devices',
+        auth: true,
+        payload: {},
+    },
+    {
+        id: 'profile_logout_other_devices',
+        group: '2. User Profile & Preferences',
+        title: 'Log out of all other devices',
+        method: 'POST',
+        path: '/profile/devices/logout-others',
+        auth: true,
+        payload: {},
+    },
+    {
         id: 'profile_change_pwd',
-        group: '2. User Profile',
+        group: '2. User Profile & Preferences',
         title: 'Change Password',
         method: 'POST',
         path: '/change-password',
         auth: true,
         payload: {
-            current_password: 'password123',
-            password: 'newpassword456',
-            password_confirmation: 'newpassword456',
-        },
-    },
-    {
-        id: 'profile_delete',
-        group: '2. User Profile',
-        title: 'Delete Account',
-        method: 'POST',
-        path: '/account-delete',
-        auth: true,
-        payload: {
-            password: 'password123',
+            old_password: 'password',
+            password: 'newpassword123',
+            password_confirmation: 'newpassword123',
         },
     },
     {
         id: 'auth_logout',
-        group: '2. User Profile',
+        group: '2. User Profile & Preferences',
         title: 'User Logout',
         method: 'POST',
         path: '/logout',
+        auth: true,
+        payload: {},
+    },
+    {
+        id: 'profile_delete',
+        group: '2. User Profile & Preferences',
+        title: 'Delete Account',
+        method: 'POST',
+        path: '/account-delete',
         auth: true,
         payload: {},
     },
@@ -562,9 +661,40 @@ export default function ApiTesterPage() {
         }
     };
 
-    // Textarea keyboard shortcuts: Tab indentation & Undo/Redo
+    // Manual & Shortcut Save Handler (Ctrl+S)
+    const handleSaveCurrent = () => {
+        const updated = {
+            ...savedData,
+            [selectedEndpoint.id]: {
+                ...savedData[selectedEndpoint.id],
+                path: customPath,
+                payload: payloadText,
+            },
+        };
+        setSavedData(updated);
+        localStorage.setItem('pitchprox_custom_data', JSON.stringify(updated));
+        triggerAutoSaved();
+    };
+
+    // Global Keydown Listener to intercept Ctrl+S across the entire page
+    useEffect(() => {
+        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault(); // Prevent browser "Save webpage" dialog
+                handleSaveCurrent();
+            }
+        };
+
+        window.addEventListener('keydown', handleGlobalKeyDown);
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }, [selectedEndpoint.id, customPath, payloadText, savedData]);
+
+    // Textarea keyboard shortcuts: Ctrl+S save, Tab indentation & Undo/Redo
     const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            handleSaveCurrent();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
             e.preventDefault();
             if (e.shiftKey) {
                 handleRedo();
@@ -952,7 +1082,7 @@ export default function ApiTesterPage() {
                                     className="flex-1 w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 font-mono text-xs text-emerald-600 dark:text-emerald-400 leading-relaxed outline-none focus:border-[#0EADAB] transition resize-y min-h-[220px] lg:min-h-[280px] disabled:opacity-50 shadow-inner"
                                 />
                                 <div className="mt-2 text-[11px] text-slate-500 flex items-center justify-between">
-                                    <span className="text-[10px] text-slate-400">Ctrl+Z: Undo | Tab: Indent</span>
+                                    <span className="text-[10px] text-slate-400">Ctrl+S: Save | Ctrl+Z: Undo | Tab: Indent</span>
                                     {selectedEndpoint.method !== 'GET' && (
                                         <div className="flex items-center gap-3">
                                             <button
