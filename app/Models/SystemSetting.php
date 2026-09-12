@@ -82,4 +82,19 @@ class SystemSetting extends Model
     {
         return $this->favicon;
     }
+
+    public function getSmallDescriptionAttribute()
+    {
+        return $this->description;
+    }
+
+    public function getAppleStoreUrlAttribute()
+    {
+        return $this->apple_store_link;
+    }
+
+    public function getPlayStoreUrlAttribute()
+    {
+        return $this->play_store_link;
+    }
 }

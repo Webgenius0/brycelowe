@@ -13,6 +13,7 @@ class DynamicPage extends Model
         'page_title',
         'page_subtitle',
         'slug',
+        'page_slug',
         'page_content',
         'status',
     ];
@@ -20,4 +21,20 @@ class DynamicPage extends Model
     protected $hidden = [
         'created_at',
     ];
+
+    /**
+     * Accessor for page_slug attribute.
+     */
+    public function getPageSlugAttribute(): ?string
+    {
+        return $this->slug;
+    }
+
+    /**
+     * Mutator for page_slug attribute.
+     */
+    public function setPageSlugAttribute($value): void
+    {
+        $this->attributes['slug'] = $value;
+    }
 }
