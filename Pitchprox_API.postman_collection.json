@@ -1,1361 +1,2696 @@
 {
-	"info": {
-		"_postman_id": "8f2e64b8-2a90-4c3e-a89e-272e5192080a",
-		"name": "Pitchprox API Collection",
-		"description": "Comprehensive REST API Collection for Pitchprox Backend: Auth, Profile, System Settings, Dynamic Pages, Plans & Discounts, Support Tickets, Subscriptions, Usages & Billing.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Authentication & Profile",
-			"item": [
-				{
-					"name": "Register",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/register",
-							"host": ["{{base_url}}"],
-							"path": ["api", "register"]
-						}
-					}
-				},
-				{
-					"name": "Verify OTP (Registration)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"1234\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/verify_otp",
-							"host": ["{{base_url}}"],
-							"path": ["api", "verify_otp"]
-						}
-					}
-				},
-				{
-					"name": "Resend OTP",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"john@example.com\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/resend_otp",
-							"host": ["{{base_url}}"],
-							"path": ["api", "resend_otp"]
-						}
-					}
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.data && jsonData.data.token) {",
-									"    pm.environment.set(\"token\", jsonData.data.token);",
-									"} else if (jsonData.token) {",
-									"    pm.environment.set(\"token\", jsonData.token);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"admin@admin.com\",\n    \"password\": \"password\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/login",
-							"host": ["{{base_url}}"],
-							"path": ["api", "login"]
-						}
-					}
-				},
-				{
-					"name": "Social Login",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"provider\": \"google\",\n    \"provider_id\": \"1234567890\",\n    \"email\": \"user@gmail.com\",\n    \"name\": \"Google User\",\n    \"avatar\": \"https://example.com/avatar.png\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/login/social",
-							"host": ["{{base_url}}"],
-							"path": ["api", "login", "social"]
-						}
-					}
-				},
-				{
-					"name": "Forgot Password - Send OTP",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"john@example.com\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/forgot-password",
-							"host": ["{{base_url}}"],
-							"path": ["api", "forgot-password"]
-						}
-					}
-				},
-				{
-					"name": "Forgot Password - Verify OTP",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"1234\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/forgot-verify-otp",
-							"host": ["{{base_url}}"],
-							"path": ["api", "forgot-verify-otp"]
-						}
-					}
-				},
-				{
-					"name": "Reset Password",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/reset-password",
-							"host": ["{{base_url}}"],
-							"path": ["api", "reset-password"]
-						}
-					}
-				},
-				{
-					"name": "Get Authenticated User",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/user-detail",
-							"host": ["{{base_url}}"],
-							"path": ["api", "user-detail"]
-						}
-					}
-				},
-				{
-					"name": "Update Profile Name (Full Name Only)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"full_name\": \"John Lowe Updated\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/profile/update",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "update"]
-						}
-					}
-				},
-				{
-					"name": "Upload Avatar",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{ "key": "avatar", "type": "file", "src": "" }
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/api/profile/avatar",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "avatar"]
-						}
-					}
-				},
-				{
-					"name": "Delete Avatar",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/profile/avatar",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "avatar"]
-						}
-					}
-				},
-				{
-					"name": "Get Language & Timezone Preferences",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/profile/preferences",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "preferences"]
-						}
-					}
-				},
-				{
-					"name": "Update Language & Timezone",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"language\": \"en\",\n    \"timezone\": \"America/Chicago\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/profile/preferences",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "preferences"]
-						}
-					}
-				},
-				{
-					"name": "Get Notification Preferences",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/profile/notifications",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "notifications"]
-						}
-					}
-				},
-				{
-					"name": "Update Notification Preferences",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"in_app_notifications\": true,\n    \"call_reminders\": true,\n    \"follow_up_reminders\": true,\n    \"ai_insight_alerts\": true,\n    \"billing_alerts\": true,\n    \"product_updates\": true\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/profile/notifications",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "notifications"]
-						}
-					}
-				},
-				{
-					"name": "Get 2FA Security Status",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/profile/2fa",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "2fa"]
-						}
-					}
-				},
-				{
-					"name": "Toggle 2FA Status",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"enable\": true\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/profile/2fa/toggle",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "2fa", "toggle"]
-						}
-					}
-				},
-				{
-					"name": "Get Login Activity History",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/profile/login-activity",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "login-activity"]
-						}
-					}
-				},
-				{
-					"name": "Get Devices & Active Sessions",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/profile/devices",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "devices"]
-						}
-					}
-				},
-				{
-					"name": "Log out from all other devices",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/profile/devices/logout-others",
-							"host": ["{{base_url}}"],
-							"path": ["api", "profile", "devices", "logout-others"]
-						}
-					}
-				},
-				{
-					"name": "Change Password",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"old_password\": \"password\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/change-password",
-							"host": ["{{base_url}}"],
-							"path": ["api", "change-password"]
-						}
-					}
-				},
-				{
-					"name": "Delete Account",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"password\": \"password123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/account-delete",
-							"host": ["{{base_url}}"],
-							"path": ["api", "account-delete"]
-						}
-					}
-				},
-				{
-					"name": "Logout",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/logout",
-							"host": ["{{base_url}}"],
-							"path": ["api", "logout"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "System & Dynamic Pages",
-			"item": [
-				{
-					"name": "Get System Settings",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/system-setting",
-							"host": ["{{base_url}}"],
-							"path": ["api", "system-setting"]
-						}
-					}
-				},
-				{
-					"name": "List FAQs",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/faq",
-							"host": ["{{base_url}}"],
-							"path": ["api", "faq"]
-						}
-					}
-				},
-				{
-					"name": "List Dynamic Pages",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/dynamic-pages",
-							"host": ["{{base_url}}"],
-							"path": ["api", "dynamic-pages"]
-						}
-					}
-				},
-				{
-					"name": "Get Page By Slug",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/page/terms-and-conditions",
-							"host": ["{{base_url}}"],
-							"path": ["api", "page", "terms-and-conditions"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Plans & Discounts",
-			"item": [
-				{
-					"name": "List All Plans",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/plans",
-							"host": ["{{base_url}}"],
-							"path": ["api", "plans"]
-						}
-					}
-				},
-				{
-					"name": "Get Single Plan",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/plans/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "plans", "1"]
-						}
-					}
-				},
-				{
-					"name": "Validate Discount Code",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"code\": \"SUMMER20\",\n    \"plan_id\": 1\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/plans/check-discount",
-							"host": ["{{base_url}}"],
-							"path": ["api", "plans", "check-discount"]
-						}
-					}
-				},
-				{
-					"name": "Create Plan (Admin)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Growth Tier\",\n    \"description\": \"Designed for scaling businesses\",\n    \"price\": 79.00,\n    \"discount_price\": 59.00,\n    \"interval\": \"MONTHLY\",\n    \"call_credit\": 1000,\n    \"report_credit\": 250,\n    \"playbook_credit\": 50,\n    \"calibration_credit\": 10,\n    \"is_active\": true,\n    \"is_trial\": true,\n    \"trial_period\": 7,\n    \"overages_rates\": [\n        { \"overages_type\": \"CALL\", \"overages_rate\": 0.05 },\n        { \"overages_type\": \"REPORT\", \"overages_rate\": 0.15 },\n        { \"overages_type\": \"PLAYBOOK\", \"overages_rate\": 0.50 },\n        { \"overages_type\": \"CALIBRATION\", \"overages_rate\": 1.00 }\n    ],\n    \"discounts\": [\n        {\n            \"title\": \"Launch Special\",\n            \"code\": \"LAUNCH20\",\n            \"percent\": 20,\n            \"amount\": 0,\n            \"valid_until\": \"2026-12-31\",\n            \"is_active\": true\n        }\n    ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/plans",
-							"host": ["{{base_url}}"],
-							"path": ["api", "plans"]
-						}
-					}
-				},
-				{
-					"name": "Update Plan (Admin)",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Growth Tier Pro\",\n    \"price\": 89.00\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/plans/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "plans", "1"]
-						}
-					}
-				},
-				{
-					"name": "Delete Plan (Admin)",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/plans/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "plans", "1"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Support Tickets",
-			"item": [
-				{
-					"name": "List User Tickets",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/tickets",
-							"host": ["{{base_url}}"],
-							"path": ["api", "tickets"]
-						}
-					}
-				},
-				{
-					"name": "Create Support Ticket (Multipart)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{ "key": "category", "value": "TECHNICAL", "type": "text" },
-								{ "key": "priority", "value": "HIGH", "type": "text" },
-								{ "key": "subject", "value": "Webhook delivery failure", "type": "text" },
-								{ "key": "message", "value": "Getting 500 error when receiving postback", "type": "text" }
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/api/tickets",
-							"host": ["{{base_url}}"],
-							"path": ["api", "tickets"]
-						}
-					}
-				},
-				{
-					"name": "Get Ticket Details",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/tickets/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "tickets", "1"]
-						}
-					}
-				},
-				{
-					"name": "Update Ticket Status",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"status\": \"RESOLVED\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/tickets/1/status",
-							"host": ["{{base_url}}"],
-							"path": ["api", "tickets", "1", "status"]
-						}
-					}
-				},
-				{
-					"name": "Delete Ticket",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/tickets/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "tickets", "1"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Subscriptions, Usages & Billing",
-			"item": [
-				{
-					"name": "List User Subscriptions",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/subscriptions",
-							"host": ["{{base_url}}"],
-							"path": ["api", "subscriptions"]
-						}
-					}
-				},
-				{
-					"name": "Subscribe to Plan",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"plan_id\": 1,\n    \"discount_code\": \"LAUNCH20\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/subscriptions",
-							"host": ["{{base_url}}"],
-							"path": ["api", "subscriptions"]
-						}
-					}
-				},
-				{
-					"name": "Get Subscription Details with Usage",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/subscriptions/1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "subscriptions", "1"]
-						}
-					}
-				},
-				{
-					"name": "Record Overusage Event",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"overusages_type\": \"CALL\",\n    \"credit\": 50\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/subscriptions/1/overusage",
-							"host": ["{{base_url}}"],
-							"path": ["api", "subscriptions", "1", "overusage"]
-						}
-					}
-				},
-				{
-					"name": "Cancel Subscription",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/subscriptions/1/cancel",
-							"host": ["{{base_url}}"],
-							"path": ["api", "subscriptions", "1", "cancel"]
-						}
-					}
-				},
-				{
-					"name": "List User Billing Invoices",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/billings",
-							"host": ["{{base_url}}"],
-							"path": ["api", "billings"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Prospect Mail & Support",
-			"item": [
-				{
-					"name": "Send Prospect Email",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"to\": \"prospect@example.com\",\n    \"cc\": \"team@pitchprox.com\",\n    \"subject\": \"Exclusive update on your property valuation\",\n    \"message\": \"Hi {First Name},\\n\\nI wanted to share the latest market insights for {Property Address}.\\n\\nBest regards,\\nPitchProX Team\",\n    \"is_tracked\": true\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/mail/send",
-							"host": ["{{base_url}}"],
-							"path": ["api", "mail", "send"]
-						}
-					}
-				},
-				{
-					"name": "List Recent Prospect Emails",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/mail/recents",
-							"host": ["{{base_url}}"],
-							"path": ["api", "mail", "recents"]
-						}
-					}
-				},
-				{
-					"name": "Get Quick Email Templates",
-					"request": {
-						"method": "GET",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"url": {
-							"raw": "{{base_url}}/api/mail/templates",
-							"host": ["{{base_url}}"],
-							"path": ["api", "mail", "templates"]
-						}
-					}
-				},
-				{
-					"name": "AI Email Assistant Copy Generator",
-					"request": {
-						"method": "POST",
-						"header": [
-							{ "key": "Accept", "value": "application/json" },
-							{ "key": "Content-Type", "value": "application/json" },
-							{ "key": "Authorization", "value": "Bearer {{token}}" }
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"prompt\": \"Follow up after an initial phone consultation regarding property listing\",\n    \"tone\": \"Professional\",\n    \"recipient_name\": \"Sarah\",\n    \"property_address\": \"742 Evergreen Terrace\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/mail/ai-assist",
-							"host": ["{{base_url}}"],
-							"path": ["api", "mail", "ai-assist"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Admin APIs",
-			"item": [
-				{
-					"name": "Dashboard & KPIs",
-					"item": [
-						{
-							"name": "Get Dashboard Stats",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/dashboard/stats",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "dashboard", "stats"]
-								}
-							}
-						},
-						{
-							"name": "Get Timeline & Chart Metrics",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/dashboard/charts",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "dashboard", "charts"]
-								}
-							}
-						}
-					]
-				},
-				{
-					"name": "User Management",
-					"item": [
-						{
-							"name": "List All Users (Paginated & Filterable)",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/users?page=1&per_page=15",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "users"],
-									"query": [
-										{ "key": "page", "value": "1" },
-										{ "key": "per_page", "value": "15" },
-										{ "key": "role", "value": "", "disabled": true },
-										{ "key": "status", "value": "", "disabled": true },
-										{ "key": "search", "value": "", "disabled": true }
-									]
-								}
-							}
-						},
-						{
-							"name": "Create User / Admin",
-							"request": {
-								"method": "POST",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Content-Type", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\": \"Admin Staff\",\n    \"email\": \"admin_staff@pitchprox.com\",\n    \"password\": \"password123\",\n    \"role\": \"Admin\",\n    \"status\": \"Active\",\n    \"phone\": \"+1 555-0199\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/admin/users",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "users"]
-								}
-							}
-						},
-						{
-							"name": "List Available Roles",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/users/roles/list",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "users", "roles", "list"]
-								}
-							}
-						},
-						{
-							"name": "Get User Details",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/users/1",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "users", "1"]
-								}
-							}
-						},
-						{
-							"name": "Update User",
-							"request": {
-								"method": "PATCH",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Content-Type", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\": \"Updated Admin Name\",\n    \"role\": \"SUPERADMIN\",\n    \"status\": \"Active\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/admin/users/1",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "users", "1"]
-								}
-							}
-						},
-						{
-							"name": "Update User Status",
-							"request": {
-								"method": "POST",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Content-Type", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"status\": \"Active\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/admin/users/1/status",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "users", "1", "status"]
-								}
-							}
-						},
-						{
-							"name": "Delete User",
-							"request": {
-								"method": "DELETE",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/users/1",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "users", "1"]
-								}
-							}
-						}
-					]
-				},
-				{
-					"name": "Plans Management",
-					"item": [
-						{
-							"name": "List All Plans",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/plans",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "plans"]
-								}
-							}
-						},
-						{
-							"name": "Create Plan",
-							"request": {
-								"method": "POST",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Content-Type", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\": \"Enterprise Plus\",\n    \"description\": \"Unlimited call credits and priority AI models.\",\n    \"price\": 299.00,\n    \"discount_price\": 249.00,\n    \"interval\": \"monthly\",\n    \"call_credit\": 1000,\n    \"report_credit\": 50,\n    \"is_active\": true\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/admin/plans",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "plans"]
-								}
-							}
-						},
-						{
-							"name": "Toggle Plan Status",
-							"request": {
-								"method": "POST",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/plans/1/toggle",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "plans", "1", "toggle"]
-								}
-							}
-						}
-					]
-				},
-				{
-					"name": "Subscriptions Monitoring",
-					"item": [
-						{
-							"name": "List All Subscriptions",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/subscriptions",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "subscriptions"]
-								}
-							}
-						},
-						{
-							"name": "Update Subscription Status",
-							"request": {
-								"method": "POST",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Content-Type", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"status\": \"Active\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/admin/subscriptions/1/status",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "subscriptions", "1", "status"]
-								}
-							}
-						}
-					]
-				},
-				{
-					"name": "Support Tickets",
-					"item": [
-						{
-							"name": "List Tickets (Admin)",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/tickets?status=OPEN",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "tickets"],
-									"query": [
-										{ "key": "status", "value": "OPEN" }
-									]
-								}
-							}
-						},
-						{
-							"name": "Update Ticket Status & Priority",
-							"request": {
-								"method": "POST",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Content-Type", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"status\": \"RESOLVED\",\n    \"priority\": \"MEDIUM\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/admin/tickets/1/status",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "tickets", "1", "status"]
-								}
-							}
-						}
-					]
-				},
-				{
-					"name": "System Settings & Pages",
-					"item": [
-						{
-							"name": "Get System Settings",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/system-settings",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "system-settings"]
-								}
-							}
-						},
-						{
-							"name": "Update System Settings",
-							"request": {
-								"method": "POST",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Content-Type", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"site_name\": \"Pitchprox Platform\",\n    \"site_title\": \"AI Sales Analytics\",\n    \"email\": \"support@pitchprox.com\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/admin/system-settings",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "system-settings"]
-								}
-							}
-						},
-						{
-							"name": "List Dynamic Pages (Admin)",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/pages",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "pages"]
-								}
-							}
-						},
-						{
-							"name": "List FAQs (Admin)",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/faqs",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "faqs"]
-								}
-							}
-						}
-					]
-				},
-				{
-					"name": "Mail & Template Management (Admin)",
-					"item": [
-						{
-							"name": "List All Platform Prospect Emails",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/mail/emails",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "mail", "emails"]
-								}
-							}
-						},
-						{
-							"name": "Get Email Details",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/mail/emails/1",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "mail", "emails", "1"]
-								}
-							}
-						},
-						{
-							"name": "List Email Templates (Admin)",
-							"request": {
-								"method": "GET",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"url": {
-									"raw": "{{base_url}}/api/admin/mail/templates",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "mail", "templates"]
-								}
-							}
-						},
-						{
-							"name": "Create Email Template (Admin)",
-							"request": {
-								"method": "POST",
-								"header": [
-									{ "key": "Accept", "value": "application/json" },
-									{ "key": "Content-Type", "value": "application/json" },
-									{ "key": "Authorization", "value": "Bearer {{token}}" }
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"title\": \"Custom Followup\",\n    \"subject\": \"Property update for {Property Address}\",\n    \"body\": \"Hi {First Name},\\n\\nHere are the latest insights...\",\n    \"category\": \"Followup\",\n    \"is_system\": true\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/admin/mail/templates",
-									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "mail", "templates"]
-								}
-							}
-						}
-					]
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://127.0.0.1:8000"
-		},
-		{
-			"key": "token",
-			"value": ""
-		}
-	]
+  "info": {
+    "_postman_id": "8f2e64b8-2a90-4c3e-a89e-272e5192080a",
+    "name": "Pitchprox API Collection (API Routes Only)",
+    "description": "Postman collection containing exclusively the standard API routes (routes/api.php) for Pitchprox: Auth, Profile, System Settings, Dynamic Pages, Plans & Discounts, Support Tickets, Subscriptions & Usages, and Prospect Mail.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication (Guest Routes)",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP (Registration)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"1234\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/verify_otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "verify_otp"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resend OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/resend_otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "resend_otp"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.environment.set(\"token\", jsonData.data.token);",
+                  "} else if (jsonData.token) {",
+                  "    pm.environment.set(\"token\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Social Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"provider\": \"google\",\n    \"provider_id\": \"1234567890\",\n    \"email\": \"user@gmail.com\",\n    \"name\": \"Google User\",\n    \"avatar\": \"https://example.com/avatar.png\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login/social",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login",
+                "social"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "forgot-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"1234\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/forgot-verify-otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "forgot-verify-otp"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"newpassword123\",\n    \"password_confirmation\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reset-password"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Authenticated Profile & Account",
+      "item": [
+        {
+          "name": "Get Authenticated User (/api/user)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Details (/api/user-detail)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/user-detail",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user-detail"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Profile Name",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"full_name\": \"John Lowe Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/profile/update",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "update"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Avatar (Multipart)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/profile/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "avatar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Avatar",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "avatar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Language & Timezone Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile/preferences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "preferences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Language & Timezone Preferences",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"language\": \"en\",\n    \"timezone\": \"America/New_York\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/profile/preferences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "preferences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Notification Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "notifications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Notification Preferences",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email_notifications\": true,\n    \"marketing_emails\": false,\n    \"security_alerts\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/profile/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "notifications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get 2FA Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile/2fa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "2fa"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle 2FA Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"enable\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/profile/2fa/toggle",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "2fa",
+                "toggle"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Login Activity History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile/login-activity",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "login-activity"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Devices & Active Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile/devices",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "devices"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Log Out Other Devices",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile/devices/logout-others",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "devices",
+                "logout-others"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Revoke Specific Device Session",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile/devices/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "devices",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"current_password\": \"password123\",\n    \"password\": \"newPassword123\",\n    \"password_confirmation\": \"newPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "change-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/account-delete",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "account-delete"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. System Settings & Dynamic Pages",
+      "item": [
+        {
+          "name": "Get System Settings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/system-setting",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "system-setting"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List FAQs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/faq",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "faq"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Dynamic Pages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dynamic-pages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dynamic-pages"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Page By Slug",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/page/terms-and-conditions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "page",
+                "terms-and-conditions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Terms & Conditions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/terms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "terms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Privacy Policy",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/privacy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "privacy"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Subscription Plans & Discounts",
+      "item": [
+        {
+          "name": "List All Plans (Public)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/plans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "plans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Plan (Public)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/plans/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Validate Discount Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"plan_id\": 1,\n    \"code\": \"WELCOME20\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/plans/check-discount",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "check-discount"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Plan (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Enterprise Pro\",\n    \"price\": 199,\n    \"billing_cycle\": \"monthly\",\n    \"lookup_limit\": 10000,\n    \"export_limit\": 5000,\n    \"is_active\": true,\n    \"features\": [\n        \"Unlimited Lookups\",\n        \"Priority Support\",\n        \"Team Access\"\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/plans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "plans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Plan (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Enterprise Pro (Updated)\",\n    \"price\": 179,\n    \"lookup_limit\": 12000,\n    \"export_limit\": 6000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/plans/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Plan (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/plans/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "plans",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Support Tickets",
+      "item": [
+        {
+          "name": "List User Tickets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tickets",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Support Ticket (Multipart with Attachment)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "subject",
+                  "value": "API lookup quota issue",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "My monthly quota did not reset today.",
+                  "type": "text"
+                },
+                {
+                  "key": "priority",
+                  "value": "HIGH",
+                  "type": "text"
+                },
+                {
+                  "key": "attachment",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tickets",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Ticket Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tickets/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Ticket Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"RESOLVED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tickets/1/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "1",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Ticket",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tickets/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Subscriptions, Usages & Billing",
+      "item": [
+        {
+          "name": "List User Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/subscriptions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Subscribe to Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"plan_id\": 1,\n    \"payment_method_id\": \"pm_card_visa\",\n    \"discount_code\": \"WELCOME20\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/subscriptions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Subscription Details with Usage",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/subscriptions/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Record Overusage Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"action_type\": \"extra_export\",\n    \"units\": 100\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/subscriptions/1/overusage",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "1",
+                "overusage"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"Switching plans\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/subscriptions/1/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "1",
+                "cancel"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List User Billing Invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/billings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "billings"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Prospect Mail & Support",
+      "item": [
+        {
+          "name": "Send Prospect Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"prospect_id\": 1,\n    \"recipient_email\": \"prospect@targetcorp.com\",\n    \"subject\": \"Partnership opportunity with Pitchprox\",\n    \"body\": \"Hi team,\\n\\nWe noticed your recent expansion and would love to connect...\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/mail/send",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "mail",
+                "send"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Recent Prospect Emails",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/mail/recents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "mail",
+                "recents"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Quick Email Templates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/mail/templates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "mail",
+                "templates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "AI Email Assistant Copy Generator",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"prompt\": \"Cold outreach to a VP of Sales at a SaaS startup\",\n    \"tone\": \"professional\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/mail/ai-assist",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "mail",
+                "ai-assist"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Leads Management",
+      "item": [
+        {
+          "name": "List Leads",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/leads?search=&status=&priority=&page=1&per_page=15",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "leads"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "priority",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "15"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Lead",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"phone_number_1\": \"+1 (555) 123-4567\",\n  \"phone_number_2\": \"+1 (555) 987-6543\",\n  \"phone_number_3\": \"+1 (555) 246-8101\",\n  \"property_address\": \"742 Evergreen Terrace\",\n  \"city\": \"Springfield\",\n  \"state\": \"OR\",\n  \"zip_code\": \"97477\",\n  \"lead_type\": \"Seller\",\n  \"notes\": \"Looking to sell single-family property within 30 days.\",\n  \"in_followup_queue\": true,\n  \"priority\": \"High\",\n  \"status\": \"New\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/leads",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "leads"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Lead Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/leads/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "leads",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Lead",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Sarah Connor\",\n  \"status\": \"Contacted\",\n  \"priority\": \"Urgent\",\n  \"estimated_value\": 30000,\n  \"notes\": \"Updated call notes: follow up next Tuesday.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/leads/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "leads",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Log Lead Activity / Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activity_type\": \"Demo Scheduled\",\n  \"description\": \"AI platform demo scheduled with leadership team for Friday 2 PM.\",\n  \"is_completed\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/leads/1/activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "leads",
+                "1",
+                "activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Phone Number to Lead",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"number\": \"+15557788990\",\n  \"is_default\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/leads/1/numbers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "leads",
+                "1",
+                "numbers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Phone Number",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/leads/1/numbers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "leads",
+                "1",
+                "numbers",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Lead",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/leads/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "leads",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Calls & AI Call Reports",
+      "item": [
+        {
+          "name": "Call History (Tab 1)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/calls/history?period=6 Month&lead_type=All lead type&outcome=All outcomes&search=&page=1&per_page=15",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "6 Month"
+                },
+                {
+                  "key": "lead_type",
+                  "value": "All lead type"
+                },
+                {
+                  "key": "outcome",
+                  "value": "All outcomes"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "15"
+                }
+              ]
+            },
+            "description": "Matches the Call History tab with exact table columns: date, time, name, property_address, lead_type, formatted_trust_gain, outcome, formatted_ai_adherence, duration_formatted, has_report, and summary counts."
+          }
+        },
+        {
+          "name": "Follow-up Queue (Tab 2)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/calls/followup-queue?period=6 Month&lead_type=All lead type&outcome=All outcomes&search=&page=1&per_page=15",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls",
+                "followup-queue"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "6 Month"
+                },
+                {
+                  "key": "lead_type",
+                  "value": "All lead type"
+                },
+                {
+                  "key": "outcome",
+                  "value": "All outcomes"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "15"
+                }
+              ]
+            },
+            "description": "Matches the Follow up Queue tab with calculated followup_due_text (e.g. Follow up in 1 day, Overdue by 2 days)."
+          }
+        },
+        {
+          "name": "Update Call Outcome (Inline Badge)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"Appointment Set\",\n  \"next_call\": \"2026-09-22 10:30:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/calls/1/outcome",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls",
+                "1",
+                "outcome"
+              ]
+            },
+            "description": "Quickly change outcome from the dropdown badge (e.g., Appointment Set, Follow Up, Not A Fit). Automatically syncs with leads table."
+          }
+        },
+        {
+          "name": "Toggle / Update Follow-up Queue",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"in_queue\": true,\n  \"next_call\": \"2026-09-22 10:30:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/calls/1/queue",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls",
+                "1",
+                "queue"
+              ]
+            },
+            "description": "Explicitly add or remove a call from the follow-up queue."
+          }
+        },
+        {
+          "name": "List Calls",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/calls?search=&lead_id=&outcome=&page=1&per_page=15",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "lead_id",
+                  "value": ""
+                },
+                {
+                  "key": "outcome",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "15"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Log Call with AI Analytics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lead_id\": 1,\n  \"duration\": 215,\n  \"outcome\": \"Scheduled Demo\",\n  \"trust_gain\": 25,\n  \"ai_adherance\": 96,\n  \"report\": {\n    \"summary\": \"Prospect engaged actively with AI voice agent, agreed to a product demo.\",\n    \"talk_ratio\": 42,\n    \"listen_ratio\": 58,\n    \"trust_score\": 91,\n    \"sentiment\": {\n      \"overall\": \"Positive\",\n      \"score\": 0.94\n    },\n    \"objections\": [\n      \"Implementation timeline\"\n    ],\n    \"key_insights\": [\n      \"Looking to replace manual qualifying team within 30 days\"\n    ],\n    \"next_step\": [\n      \"Send calendar invite for Friday 2pm\"\n    ]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/calls",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Call Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/calls/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get AI Call Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/calls/1/report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls",
+                "1",
+                "report"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save / Update AI Call Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"summary\": \"Updated analysis: high intent enterprise buyer.\",\n  \"talk_ratio\": 40,\n  \"listen_ratio\": 60,\n  \"trust_score\": 95,\n  \"conversion_indicators\": [\n    \"Requested custom enterprise agreement\"\n  ],\n  \"next_step\": [\n    \"Send executive summary document\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/calls/1/report",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls",
+                "1",
+                "report"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Call Audio Recording (Multipart)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "recording",
+                  "type": "file",
+                  "description": "Audio file (mp3, wav, m4a)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/calls/1/recording",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls",
+                "1",
+                "recording"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Call",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/calls/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calls",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. AI Training Content",
+      "item": [
+        {
+          "name": "List Training Contents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/training-contents?content_category=&type=&status=&page=1&per_page=15",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "training-contents"
+              ],
+              "query": [
+                {
+                  "key": "content_category",
+                  "value": ""
+                },
+                {
+                  "key": "type",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "15"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Training Content (Multipart)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Training document or audio (PDF, DOCX, TXT, MP3, WAV)"
+                },
+                {
+                  "key": "content_category",
+                  "value": "Sales Pitch",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "Document",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "Trained",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/training-contents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "training-contents"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Training Content Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/training-contents/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "training-contents",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Training Content Metadata",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content_category\": \"Objection Handling\",\n  \"is_active\": true,\n  \"status\": \"Active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/training-contents/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "training-contents",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Active Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/training-contents/1/toggle-status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "training-contents",
+                "1",
+                "toggle-status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Training Content",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/training-contents/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "training-contents",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Notifications Feed & Channels",
+      "item": [
+        {
+          "name": "Get In-App Notifications Feed",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications?unread_only=false&page=1&per_page=15",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "unread_only",
+                  "value": "false"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "15"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Notification Count Badge",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/unread-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "unread-count"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dispatch Test Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Enterprise Lead Assigned\",\n  \"message\": \"Dr. Sarah Connor requested an urgent platform walkthrough.\",\n  \"action_url\": \"/leads/1\",\n  \"type\": \"LeadAlert\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/notifications/test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "test"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Single Notification as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/YOUR_NOTIFICATION_UUID_HERE/read",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "YOUR_NOTIFICATION_UUID_HERE",
+                "read"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/read-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "read-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Notification Channels & Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/channels",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "channels"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Notification Channel Preference",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/channels/1/toggle",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "channels",
+                "1",
+                "toggle"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Clear All Notifications",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/clear-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "clear-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Single Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/YOUR_NOTIFICATION_UUID_HERE",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "YOUR_NOTIFICATION_UUID_HERE"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
 }

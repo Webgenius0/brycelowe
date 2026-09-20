@@ -4,6 +4,7 @@ use App\Http\Controllers\API\Admin\AdminCompanyController;
 use App\Http\Controllers\API\Admin\AdminDashboardController;
 use App\Http\Controllers\API\Admin\AdminDynamicPageController;
 use App\Http\Controllers\API\Admin\AdminFaqController;
+use App\Http\Controllers\API\Admin\AdminMailController;
 use App\Http\Controllers\API\Admin\AdminPlanController;
 use App\Http\Controllers\API\Admin\AdminSubscriptionController;
 use App\Http\Controllers\API\Admin\AdminSystemSettingController;
@@ -101,12 +102,12 @@ Route::prefix('system-settings')->group(function () {
 
 // 10. Prospect Emails & Template Management
 Route::prefix('mail')->group(function () {
-    Route::get('/emails', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'index']);
-    Route::get('/emails/{id}', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'show']);
-    Route::delete('/emails/{id}', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'destroy']);
-    Route::post('/send', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'send']);
-    Route::get('/templates', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'templates']);
-    Route::post('/templates', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'storeTemplate']);
-    Route::match(['put', 'patch', 'post'], '/templates/{id}', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'updateTemplate']);
-    Route::delete('/templates/{id}', [\App\Http\Controllers\API\Admin\AdminMailController::class, 'destroyTemplate']);
+    Route::get('/emails', [AdminMailController::class, 'index']);
+    Route::get('/emails/{id}', [AdminMailController::class, 'show']);
+    Route::delete('/emails/{id}', [AdminMailController::class, 'destroy']);
+    Route::post('/send', [AdminMailController::class, 'send']);
+    Route::get('/templates', [AdminMailController::class, 'templates']);
+    Route::post('/templates', [AdminMailController::class, 'storeTemplate']);
+    Route::match(['put', 'patch', 'post'], '/templates/{id}', [AdminMailController::class, 'updateTemplate']);
+    Route::delete('/templates/{id}', [AdminMailController::class, 'destroyTemplate']);
 });

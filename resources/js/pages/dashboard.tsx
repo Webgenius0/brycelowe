@@ -22,6 +22,7 @@ import {
     ArrowUpRight,
     ArrowRight,
     Clock,
+    Code2,
 } from 'lucide-react';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import {
@@ -520,6 +521,15 @@ export default function Dashboard({
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
+                        <Link
+                            href="/api-tester"
+                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#0EADAB] to-[#0b8d8b] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:opacity-95 transition-all cursor-pointer"
+                            title="Interactive API Testing Console"
+                        >
+                            <Code2 className="size-4" />
+                            <span>API Tester</span>
+                        </Link>
+
                         {/* Segmented Control for Lifetime vs Period Mode */}
                         <div className="inline-flex rounded-xl border border-sidebar-border bg-card p-1 shadow-2xs">
                             <button

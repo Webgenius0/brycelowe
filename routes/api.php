@@ -2,14 +2,18 @@
 
 use App\Http\Controllers\API\Auth\LoginController;
 use App\Http\Controllers\API\Auth\ProfileController;
-use App\Http\Controllers\API\Auth\ProfileUpdateController;
 use App\Http\Controllers\API\Auth\RegisterController;
 use App\Http\Controllers\API\Auth\SocialLoginController;
+use App\Http\Controllers\API\Call\CallController;
 use App\Http\Controllers\API\DynamicPage\DynamicPageController;
+use App\Http\Controllers\API\Lead\LeadController;
+use App\Http\Controllers\API\MailApiController;
+use App\Http\Controllers\API\Notification\NotificationController;
 use App\Http\Controllers\API\Plan\PlanController;
 use App\Http\Controllers\API\Subscription\SubscriptionController;
 use App\Http\Controllers\API\SystemSetting\SystemSettingController;
 use App\Http\Controllers\API\Ticket\TicketController;
+use App\Http\Controllers\API\Training\TrainingContentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -104,8 +108,51 @@ Route::group(['middleware' => ['auth:sanctum', 'check.status']], function () {
     Route::delete('/plans/{id}', [PlanController::class, 'destroy']);
 
     // Prospect Mail & Support API
-    Route::get('/mail/recents', [\App\Http\Controllers\API\MailApiController::class, 'recents']);
-    Route::get('/mail/templates', [\App\Http\Controllers\API\MailApiController::class, 'templates']);
-    Route::post('/mail/send', [\App\Http\Controllers\API\MailApiController::class, 'send']);
-    Route::post('/mail/ai-assist', [\App\Http\Controllers\API\MailApiController::class, 'aiAssist']);
+    Route::get('/mail/recents', [MailApiController::class, 'recents']);
+    Route::get('/mail/templates', [MailApiController::class, 'templates']);
+    Route::post('/mail/send', [MailApiController::class, 'send']);
+    Route::post('/mail/ai-assist', [MailApiController::class, 'aiAssist']);
+
+    // Leads Management API
+    Route::get('/leads', [LeadController::class, 'index']);
+    Route::post('/leads', [LeadController::class, 'store']);
+    Route::get('/leads/{id}', [LeadController::class, 'show']);
+    Route::match(['put', 'patch'], '/leads/{id}', [LeadController::class, 'update']);
+    Route::delete('/leads/{id}', [LeadController::class, 'destroy']);
+    Route::post('/leads/{id}/activities', [LeadController::class, 'addActivity']);
+    Route::post('/leads/{id}/numbers', [LeadController::class, 'addNumber']);
+    Route::delete('/leads/{id}/numbers/{numberId}', [LeadController::class, 'deleteNumber']);
+
+    // Calls & AI Call Reports API (Call History & Follow-up Queue)
+    Route::get('/calls', [CallController::class, 'index']);
+    Route::get('/calls/history', [CallController::class, 'history']);
+    Route::get('/calls/followup-queue', [CallController::class, 'followupQueue']);
+    Route::get('/calls/follow-up-queue', [CallController::class, 'followupQueue']);
+    Route::post('/calls', [CallController::class, 'store']);
+    Route::get('/calls/{id}', [CallController::class, 'show']);
+    Route::patch('/calls/{id}/outcome', [CallController::class, 'updateOutcome']);
+    Route::patch('/calls/{id}/queue', [CallController::class, 'toggleQueue']);
+    Route::get('/calls/{id}/report', [CallController::class, 'report']);
+    Route::match(['post', 'put'], '/calls/{id}/report', [CallController::class, 'saveReport']);
+    Route::post('/calls/{id}/recording', [CallController::class, 'uploadRecording']);
+    Route::delete('/calls/{id}', [CallController::class, 'destroy']);
+
+    // AI Training Content API
+    Route::get('/training-contents', [TrainingContentController::class, 'index']);
+    Route::post('/training-contents', [TrainingContentController::class, 'store']);
+    Route::get('/training-contents/{id}', [TrainingContentController::class, 'show']);
+    Route::match(['put', 'patch'], '/training-contents/{id}', [TrainingContentController::class, 'update']);
+    Route::post('/training-contents/{id}/toggle-status', [TrainingContentController::class, 'toggleStatus']);
+    Route::delete('/training-contents/{id}', [TrainingContentController::class, 'destroy']);
+
+    // In-App Notifications Feed & Channel Preferences API
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::put('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/clear-all', [NotificationController::class, 'clearAll']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+    Route::get('/notifications/channels', [NotificationController::class, 'channels']);
+    Route::post('/notifications/channels/{id}/toggle', [NotificationController::class, 'toggleChannel']);
+    Route::post('/notifications/test', [NotificationController::class, 'sendTestNotification']);
 });
